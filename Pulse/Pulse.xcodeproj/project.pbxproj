@@ -1,0 +1,804 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D5AC68752F32CEBF004076CE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5AC68742F32CEBF004076CE /* WidgetKit.framework */; };
+		D5AC68772F32CEBF004076CE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5AC68762F32CEBF004076CE /* SwiftUI.framework */; };
+		D5AC68882F32CEC0004076CE /* PulseWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D5AC68722F32CEBF004076CE /* PulseWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D516CA622F245397008C041F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D516CA4C2F245395008C041F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D516CA532F245395008C041F;
+			remoteInfo = Pulse;
+		};
+		D516CA6C2F245397008C041F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D516CA4C2F245395008C041F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D516CA532F245395008C041F;
+			remoteInfo = Pulse;
+		};
+		D5AC68862F32CEC0004076CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D516CA4C2F245395008C041F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D5AC68712F32CEBF004076CE;
+			remoteInfo = PulseWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D5AC68892F32CEC0004076CE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D5AC68882F32CEC0004076CE /* PulseWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D516CA542F245395008C041F /* Pulsio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulsio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D516CA612F245397008C041F /* PulseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D516CA6B2F245397008C041F /* PulseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5AC68722F32CEBF004076CE /* PulseWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PulseWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5AC68742F32CEBF004076CE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		D5AC68762F32CEBF004076CE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D5AC688C2F32CEC0004076CE /* Exceptions for "PulseWidgets" folder in "PulseWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D5AC68712F32CEBF004076CE /* PulseWidgetsExtension */;
+		};
+		D5AC68912F32D148004076CE /* Exceptions for "Pulse" folder in "PulseWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				RecordingActivityAttributes.swift,
+			);
+			target = D5AC68712F32CEBF004076CE /* PulseWidgetsExtension */;
+		};
+		D5AC68932F32D324004076CE /* Exceptions for "Pulse" folder in "Pulsio" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D516CA532F245395008C041F /* Pulsio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D516CA562F245395008C041F /* Pulse */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D5AC68932F32D324004076CE /* Exceptions for "Pulse" folder in "Pulsio" target */,
+				D5AC68912F32D148004076CE /* Exceptions for "Pulse" folder in "PulseWidgetsExtension" target */,
+			);
+			path = Pulse;
+			sourceTree = "<group>";
+		};
+		D516CA642F245397008C041F /* PulseTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PulseTests;
+			sourceTree = "<group>";
+		};
+		D516CA6E2F245397008C041F /* PulseUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PulseUITests;
+			sourceTree = "<group>";
+		};
+		D5AC68782F32CEBF004076CE /* PulseWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D5AC688C2F32CEC0004076CE /* Exceptions for "PulseWidgets" folder in "PulseWidgetsExtension" target */,
+			);
+			path = PulseWidgets;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D516CA512F245395008C041F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA5E2F245397008C041F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA682F245397008C041F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5AC686F2F32CEBF004076CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D5AC68772F32CEBF004076CE /* SwiftUI.framework in Frameworks */,
+				D5AC68752F32CEBF004076CE /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D516CA4B2F245395008C041F = {
+			isa = PBXGroup;
+			children = (
+				D516CA562F245395008C041F /* Pulse */,
+				D516CA642F245397008C041F /* PulseTests */,
+				D516CA6E2F245397008C041F /* PulseUITests */,
+				D5AC68782F32CEBF004076CE /* PulseWidgets */,
+				D5AC68732F32CEBF004076CE /* Frameworks */,
+				D516CA552F245395008C041F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D516CA552F245395008C041F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D516CA542F245395008C041F /* Pulsio.app */,
+				D516CA612F245397008C041F /* PulseTests.xctest */,
+				D516CA6B2F245397008C041F /* PulseUITests.xctest */,
+				D5AC68722F32CEBF004076CE /* PulseWidgetsExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D5AC68732F32CEBF004076CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D5AC68742F32CEBF004076CE /* WidgetKit.framework */,
+				D5AC68762F32CEBF004076CE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D516CA532F245395008C041F /* Pulsio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D516CA752F245397008C041F /* Build configuration list for PBXNativeTarget "Pulsio" */;
+			buildPhases = (
+				D516CA502F245395008C041F /* Sources */,
+				D516CA512F245395008C041F /* Frameworks */,
+				D516CA522F245395008C041F /* Resources */,
+				D5AC68892F32CEC0004076CE /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5AC68872F32CEC0004076CE /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D516CA562F245395008C041F /* Pulse */,
+			);
+			name = Pulsio;
+			packageProductDependencies = (
+			);
+			productName = Pulse;
+			productReference = D516CA542F245395008C041F /* Pulsio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D516CA602F245397008C041F /* PulseTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D516CA782F245397008C041F /* Build configuration list for PBXNativeTarget "PulseTests" */;
+			buildPhases = (
+				D516CA5D2F245397008C041F /* Sources */,
+				D516CA5E2F245397008C041F /* Frameworks */,
+				D516CA5F2F245397008C041F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D516CA632F245397008C041F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D516CA642F245397008C041F /* PulseTests */,
+			);
+			name = PulseTests;
+			packageProductDependencies = (
+			);
+			productName = PulseTests;
+			productReference = D516CA612F245397008C041F /* PulseTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D516CA6A2F245397008C041F /* PulseUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D516CA7B2F245397008C041F /* Build configuration list for PBXNativeTarget "PulseUITests" */;
+			buildPhases = (
+				D516CA672F245397008C041F /* Sources */,
+				D516CA682F245397008C041F /* Frameworks */,
+				D516CA692F245397008C041F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D516CA6D2F245397008C041F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D516CA6E2F245397008C041F /* PulseUITests */,
+			);
+			name = PulseUITests;
+			packageProductDependencies = (
+			);
+			productName = PulseUITests;
+			productReference = D516CA6B2F245397008C041F /* PulseUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D5AC68712F32CEBF004076CE /* PulseWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5AC688D2F32CEC0004076CE /* Build configuration list for PBXNativeTarget "PulseWidgetsExtension" */;
+			buildPhases = (
+				D5AC686E2F32CEBF004076CE /* Sources */,
+				D5AC686F2F32CEBF004076CE /* Frameworks */,
+				D5AC68702F32CEBF004076CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D5AC68782F32CEBF004076CE /* PulseWidgets */,
+			);
+			name = PulseWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = PulseWidgetsExtension;
+			productReference = D5AC68722F32CEBF004076CE /* PulseWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D516CA4C2F245395008C041F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					D516CA532F245395008C041F = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					D516CA602F245397008C041F = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = D516CA532F245395008C041F;
+					};
+					D516CA6A2F245397008C041F = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = D516CA532F245395008C041F;
+					};
+					D5AC68712F32CEBF004076CE = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = D516CA4F2F245395008C041F /* Build configuration list for PBXProject "Pulse" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D516CA4B2F245395008C041F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D516CA552F245395008C041F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D516CA532F245395008C041F /* Pulsio */,
+				D516CA602F245397008C041F /* PulseTests */,
+				D516CA6A2F245397008C041F /* PulseUITests */,
+				D5AC68712F32CEBF004076CE /* PulseWidgetsExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D516CA522F245395008C041F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA5F2F245397008C041F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA692F245397008C041F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5AC68702F32CEBF004076CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D516CA502F245395008C041F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA5D2F245397008C041F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D516CA672F245397008C041F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D5AC686E2F32CEBF004076CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D516CA632F245397008C041F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D516CA532F245395008C041F /* Pulsio */;
+			targetProxy = D516CA622F245397008C041F /* PBXContainerItemProxy */;
+		};
+		D516CA6D2F245397008C041F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D516CA532F245395008C041F /* Pulsio */;
+			targetProxy = D516CA6C2F245397008C041F /* PBXContainerItemProxy */;
+		};
+		D5AC68872F32CEC0004076CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D5AC68712F32CEBF004076CE /* PulseWidgetsExtension */;
+			targetProxy = D5AC68862F32CEC0004076CE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D516CA732F245397008C041F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D516CA742F245397008C041F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D516CA762F245397008C041F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Pulse/Pulse.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Pulse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pulsio;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Pulse can create calendar events for your action items with due dates.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pulse needs microphone access to record your meetings.";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Pulse creates reminders from your meeting action items.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pulse uses speech recognition to transcribe your meetings on-device.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.Pulse;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D516CA772F245397008C041F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Pulse/Pulse.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Pulse/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pulsio;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Pulse can create calendar events for your action items with due dates.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pulse needs microphone access to record your meetings.";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Pulse creates reminders from your meeting action items.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Pulse uses speech recognition to transcribe your meetings on-device.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.Pulse;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D516CA792F245397008C041F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.PulseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pulse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pulse";
+			};
+			name = Debug;
+		};
+		D516CA7A2F245397008C041F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.PulseTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pulse.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pulse";
+			};
+			name = Release;
+		};
+		D516CA7C2F245397008C041F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.PulseUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Pulse;
+			};
+			name = Debug;
+		};
+		D516CA7D2F245397008C041F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.PulseUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Pulse;
+			};
+			name = Release;
+		};
+		D5AC688A2F32CEC0004076CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PulseWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PulseWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.Pulse.PulseWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D5AC688B2F32CEC0004076CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K52VW4LA5H;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PulseWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PulseWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jpcostan.Pulse.PulseWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D516CA4F2F245395008C041F /* Build configuration list for PBXProject "Pulse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D516CA732F245397008C041F /* Debug */,
+				D516CA742F245397008C041F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D516CA752F245397008C041F /* Build configuration list for PBXNativeTarget "Pulsio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D516CA762F245397008C041F /* Debug */,
+				D516CA772F245397008C041F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D516CA782F245397008C041F /* Build configuration list for PBXNativeTarget "PulseTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D516CA792F245397008C041F /* Debug */,
+				D516CA7A2F245397008C041F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D516CA7B2F245397008C041F /* Build configuration list for PBXNativeTarget "PulseUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D516CA7C2F245397008C041F /* Debug */,
+				D516CA7D2F245397008C041F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D5AC688D2F32CEC0004076CE /* Build configuration list for PBXNativeTarget "PulseWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5AC688A2F32CEC0004076CE /* Debug */,
+				D5AC688B2F32CEC0004076CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D516CA4C2F245395008C041F /* Project object */;
+}

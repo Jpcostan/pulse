@@ -1,0 +1,81 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Record a meeting with ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record a meeting with ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start a meeting in ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a meeting in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start Meeting" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Meeting"
+          }
+        }
+      }
+    },
+    "Start recording in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start recording in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Stop Meeting" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Meeting"
+          }
+        }
+      }
+    },
+    "Stop meeting in ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop meeting in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Stop recording in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop recording in ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

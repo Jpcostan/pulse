@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific
+xcuserdata/
+*.xcuserstate
+
+# Xcode build
+DerivedData/
+build/
+
+# Claude Code local settings
+.claude/
+
+# Xcode debug
+*.xcbkptlist

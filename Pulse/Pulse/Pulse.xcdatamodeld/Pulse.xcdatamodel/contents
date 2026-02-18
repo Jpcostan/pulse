@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24D5034f" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="NO" userDefinedModelVersionIdentifier="">
+    <entity name="Meeting" representedClassName="Meeting" syncable="YES" codeGenerationType="class">
+        <attribute name="audioFilePath" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="duration" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="status" attributeType="String" defaultValueString="recording"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="actionItems" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ActionItem" inverseName="meeting" inverseEntity="ActionItem"/>
+        <relationship name="transcriptChunks" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TranscriptChunk" inverseName="meeting" inverseEntity="TranscriptChunk"/>
+    </entity>
+    <entity name="TranscriptChunk" representedClassName="TranscriptChunk" syncable="YES" codeGenerationType="class">
+        <attribute name="endTime" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="order" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="startTime" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="text" attributeType="String"/>
+        <relationship name="meeting" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Meeting" inverseName="transcriptChunks" inverseEntity="Meeting"/>
+    </entity>
+    <entity name="ActionItem" representedClassName="ActionItem" syncable="YES" codeGenerationType="class">
+        <attribute name="calendarEventIdentifier" optional="YES" attributeType="String"/>
+        <attribute name="confidence" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="dueDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isIncluded" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="reminderIdentifier" optional="YES" attributeType="String"/>
+        <attribute name="sourceSentence" optional="YES" attributeType="String"/>
+        <attribute name="title" attributeType="String"/>
+        <relationship name="meeting" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Meeting" inverseName="actionItems" inverseEntity="Meeting"/>
+    </entity>
+</model>

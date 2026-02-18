@@ -482,3 +482,33 @@ MUST test on physical iPhone (Live Activities don't work in simulator):
 
 ### To Resume
 > "Read CLAUDE.md for project context. Phases 0-7 are complete. Phase 8 (Siri Shortcuts) code is written but Siri does not recognize the commands on device. Debug Siri shortcut registration before proceeding to Phase 9."
+
+02/13/26
+## Session Summary
+
+### Phase 9 CODE COMPLETE: Transcription & Action Item Refinement — NEEDS MORE TESTING
+
+**What was implemented:**
+- ActionDetectionService: 17 new patterns (intent phrases, task markers, phrasal verbs, deadline indicators), negation detection, question filtering, improved date parsing ("in X days", "ASAP", "end of month", time-of-day like "by 3pm")
+- TranscriptionService: 2-second chunk overlap to prevent word loss at boundaries, 1 retry per failed chunk with 500ms delay
+- ActionReviewView: "+" button for manual action creation, date picker sheet with graphical DatePicker + time
+- MeetingDetailView: Edit/Done toggle for editable transcript chunks, saves to Core Data
+
+**Testing Results:**
+- Test 1 (action item → poem → action item): Detected 2 real actions ✅ but also 2 false positives ❌ — the word "see" (90% confidence, likely from "I'll see" prefix removal leaving just "See") and entire poem text (82% confidence, poem contained an action-like word such as "let's" or "remember")
+- Fix applied: Added false positive guards — sentence must be 3-200 words, extracted title must be 2+ words
+- Test 2 (same format after fix): False positives eliminated ✅ but only detected 1 of 2 real action items ❌ — may be over-filtering or transcription boundary issue
+
+**⚠️ MUST do additional testing before proceeding to Phase 10 (Monetization / StoreKit 2)**
+- Need to verify if the missing action item was not transcribed or was incorrectly filtered out
+- Check Console.app logs (subsystem:com.jpcostan.Pulse) to diagnose
+- May need to adjust length thresholds if over-filtering is confirmed
+
+### Files Modified This Session
+- Services/ActionDetectionService.swift (patterns, negation, question filtering, date parsing, length guards)
+- Services/TranscriptionService.swift (chunk overlap, retry logic)
+- Views/ActionReviewView.swift (manual creation, date picker)
+- Views/MeetingDetailView.swift (editable transcript)
+
+### To Resume
+> "Read CLAUDE.md for project context. Phase 9 code is complete but needs more testing — last test only detected 1 of 2 action items. Must diagnose and fix before proceeding to Phase 10."
