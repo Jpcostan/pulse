@@ -10,6 +10,8 @@ import AppIntents
 @main
 struct PulseApp: App {
     let persistenceController = PersistenceController.shared
+    // Initialize StoreService singleton at app launch so entitlements are loaded early
+    private let storeService = StoreService.shared
 
     init() {
         NSLog("🚀 PULSE APP LAUNCHED 🚀")

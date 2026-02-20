@@ -19,6 +19,7 @@ struct RecordingView: View {
     @State private var preRecordingWarningMessage = ""
     @State private var showDurationWarningAlert = false
     @State private var showAutoStopAlert = false
+    @State private var showPaywall = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -136,6 +137,15 @@ struct RecordingView: View {
         .onReceive(audioService.$didAutoStop) { stopped in
             if stopped { showAutoStopAlert = true }
         }
+        .onReceive(audioService.$didHitFreeLimit) { hit in
+            if hit { showPaywall = true }
+        }
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            // Recording already stopped and saved — proceed to processing
+            handleFreeLimitStop()
+        }) {
+            PaywallView()
+        }
         .alert("Warning", isPresented: $showPreRecordingWarning) {
             Button("Record Anyway") {
                 Task {
@@ -222,6 +232,17 @@ struct RecordingView: View {
         // Update meeting with duration and file path
         meeting.duration = result.duration
         meeting.audioFilePath = result.url.path
+        meeting.status = "processing"
+        try? meeting.managedObjectContext?.save()
+
+        showProcessing = true
+    }
+
+    private func handleFreeLimitStop() {
+        if let result = audioService.autoStopResult {
+            meeting.duration = result.duration
+            meeting.audioFilePath = result.url.path
+        }
         meeting.status = "processing"
         try? meeting.managedObjectContext?.save()
 

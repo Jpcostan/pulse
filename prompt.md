@@ -512,3 +512,69 @@ MUST test on physical iPhone (Live Activities don't work in simulator):
 
 ### To Resume
 > "Read CLAUDE.md for project context. Phase 9 code is complete but needs more testing — last test only detected 1 of 2 action items. Must diagnose and fix before proceeding to Phase 10."
+
+2/17/26
+## Session Summary
+
+### Phase 9 COMPLETED: Action Detection False Positive Fix — TESTED & WORKING ✅
+
+**Problem:** Action detection was picking up poem/narrative lines as false positives (90% confidence) while sometimes missing real action items.
+
+**Root Cause:** Generic commitment patterns like "I'll", "I will", "we should", "let's" matched ANY sentence starting with those phrases — including poetry and narrative text.
+
+**Fix: Two-Tier Pattern System with Task Context Validation**
+- Split all action patterns into two tiers via `requiresTaskContext` flag:
+  - **Generic patterns** (i'll, we should, let's, i must, etc.) → require the sentence to ALSO contain a task verb, task noun, or time reference
+  - **Specific patterns** (^send, follow up, due by, meeting, don't forget, etc.) → pass through directly
+- Added `hasTaskIndicators()` method checking against ~60 task verbs, ~30 task nouns, ~20 time indicators, and time patterns (digits + am/pm)
+- Generic patterns that fail task context `continue` to next pattern instead of rejecting the sentence
+
+**Additional Fixes This Session:**
+- Relaxed title minimum from 2 words to 1 word (stop-word check instead) — fixes over-filtering of legitimate short actions like "Call" from "I need to call"
+- Added diagnostic logging for every filter reason (FILTERED/SKIPPED with specific cause)
+- Added "due at" pattern alongside "due by"
+- Added "due today/tonight/tomorrow" pattern
+- Added "i have a meeting/homework/appointment" patterns
+- Improved debug transcript view with chunk timing, detected actions summary
+- Reverted experimental chunk deduplication code (was risky/untested)
+
+**Testing Results:**
+- Test 1: Detected both real action items ✅, no poem false positives ✅
+- Phase 9 can now be considered COMPLETE
+
+### Git Repo Consolidation
+- Removed nested `.git` inside `Pulse/` directory (was a separate repo from Xcode init)
+- All files now tracked individually by the outer `pulse/` repo
+- Added `.gitignore` (excludes .DS_Store, xcuserdata, DerivedData, .claude/)
+- Pushed all 49 files to GitHub: https://github.com/Jpcostan/pulse.git
+
+### To Resume
+> "Read CLAUDE.md for project context. Phases 0-9 are complete and tested. Phase 8 (Siri) code is written but not working on device. Ready for Phase 10 (Monetization / StoreKit 2)."
+
+2/19/26
+## Session Summary
+
+### Phase 10 COMPLETED: Monetization (StoreKit 2) ✅
+
+**Implementation:**
+- Created `StoreService.swift` — `@MainActor @Observable` singleton using StoreKit 2 async APIs (Product.products, Transaction.currentEntitlements, Transaction.updates)
+- Created `PaywallView.swift` — presented as sheet when free user hits 3-minute limit; shows branding, features, $5.99 purchase button, restore link
+- Created `SettingsView.swift` — account status (Free/Pro), upgrade button, restore purchases, Live Activity guide, app version/build
+- Created `Configuration.storekit` — local StoreKit testing config for simulator/sandbox testing
+- Modified `AudioRecordingService.swift` — added 3-minute free limit check in timer callback, `didHitFreeLimit` published property
+- Modified `RecordingView.swift` — observes `didHitFreeLimit`, presents PaywallView sheet, handles auto-stop gracefully
+- Modified `HomeView.swift` — added gear icon toolbar button for Settings navigation
+- Modified `PulseApp.swift` — initializes StoreService.shared at launch for early entitlement loading
+- Set `Configuration.storekit` as StoreKit Configuration in Xcode scheme (Run > Options)
+
+**Build & Testing:**
+- ✅ Build successful
+- ✅ StoreKit sandbox purchase tested and working on device
+- StoreKit config must be set via Xcode UI (Product > Scheme > Edit Scheme > Run > Options > StoreKit Configuration)
+
+**Phase 11 & 12 Planned:**
+- Phase 11: Polish & App Store Readiness — onboarding flow with purchase on last slide, free-mode UX indicator, Siri debugging, performance pass, App Store assets
+- Phase 12: Comprehensive end-to-end testing (17 test categories covering every flow, edge case, and integration)
+
+### To Resume
+> "Read CLAUDE.md for project context. Phases 0-10 are complete and tested. Phase 8 (Siri) code is written but not working on device. Ready for Phase 11 (Polish & App Store Readiness), then Phase 12 (End-to-End Testing)."

@@ -1,8 +1,8 @@
 # Pulse - Claude Development Context
 
-> **Last Updated:** 2026-02-13
-> **Current Status:** Phase 9 (Transcription & Action Item Refinement) - Code complete, NEEDS MORE TESTING
-> **Next Phase:** Complete Phase 9 testing, then Phase 10 (Monetization / StoreKit 2)
+> **Last Updated:** 2026-02-19
+> **Current Status:** Phase 10 COMPLETE — Monetization with StoreKit 2
+> **Next Phase:** Phase 11 (Polish & App Store Readiness)
 
 ---
 
@@ -105,7 +105,7 @@
 - **Deep Linking:** URL scheme `pulse://recording` to return to active recording
 - **Tested on physical device:** Timer updates on lock screen, recording continues in background
 
-### 🚧 Phase 8: Siri Shortcuts (App Intents) — CODE COMPLETE, SIRI NOT WORKING
+### ⏸️ Phase 8: Siri Shortcuts (App Intents) — CODE COMPLETE, DEBUGGING DEFERRED TO PHASE 11
 - **StartMeetingIntent:** Opens app, creates meeting with optional title, navigates to RecordingView
 - **StopMeetingIntent:** Stops current recording, updates meeting in Core Data, returns duration dialog
 - **MeetingIntentState:** Shared `@Observable` state connecting intents to UI navigation
@@ -115,72 +115,240 @@
 - **AudioRecordingService:** Converted to shared singleton for intent access
 - **HomeView:** Observes intent state, auto-creates meeting and navigates when triggered
 
-### 🧪 Phase 9: Transcription & Action Item Refinement — CODE COMPLETE, NEEDS MORE TESTING
-- **New Action Patterns:** Intent phrases ("i plan to", "i intend to"), task markers ("action item", "todo"), phrasal verbs ("reach out to", "circle back", "follow up on"), deadline indicators ("deadline is", "due by")
+### ✅ Phase 9: Transcription & Action Item Refinement — COMPLETE
+- **Two-Tier Pattern System (2026-02-17):** Patterns split into generic (need task context) and specific (pass through). Generic patterns like "i'll", "we should" require a task verb, task noun, or time reference in the sentence. Prevents poems/narrative from triggering false positives.
+- **Task Context Validation:** `hasTaskIndicators()` checks ~60 task verbs, ~30 task nouns, ~20 time indicators, and digit+am/pm patterns
+- **New Action Patterns:** Intent phrases, task markers, phrasal verbs, deadline indicators ("due at", "due by", "due tomorrow"), "i have a meeting/homework/appointment" patterns
 - **Negation Detection:** Sentences starting with "don't/do not" + verb are filtered out (exception: "don't forget" remains an action)
 - **Question Filtering:** Sentences ending in "?" excluded unless they contain request patterns ("can you", "could you", "will you", "please")
 - **Improved Date Parsing:** "in X days/weeks/months", "within a week/month", "ASAP" → tomorrow, "end of month" → last day, time-of-day extraction ("by 3pm", "before noon", "eod")
-- **False Positive Guards (2026-02-13):** Added sentence length filters (min 3 words, max 200 chars) and minimum title length (2+ words after prefix removal) to prevent fragments and long non-action text from being detected
+- **False Positive Guards:** Sentence length (min 3 words, max 200 chars), stop-word title filter (single stop words like "see", "that" rejected; real action verbs like "call" allowed)
+- **Diagnostic Logging:** Every filtered sentence logs the specific reason (too short, too long, negation, question, no task context, stop word title)
 - **Chunk Overlap:** 2-second overlap between transcription chunks to prevent word loss at boundaries (28s stride for 30s chunks)
 - **Chunk Retry:** 1 retry per failed chunk (2 attempts total) with 500ms pause between attempts
 - **Manual Action Creation:** "+" toolbar button in ActionReviewView creates new ActionItem with empty title, 100% confidence, auto-focused for immediate typing
 - **Date Picker:** Tap date or "Add date" on any action item opens graphical DatePicker sheet with time component; includes "Remove Date" option
 - **Editable Transcript:** "Edit"/"Done" toggle in MeetingDetailView Transcript section; edit mode shows TextEditor fields per chunk; saves to Core Data on "Done"
-- **Testing Status (2026-02-13):**
-  - Test 1: Detected 2 real action items + 2 false positives (fragment "see" and entire poem). Fixed with length guards.
-  - Test 2: After fix, only detected 1 of 2 real action items. May be over-filtering or transcription boundary issue.
-  - **⚠️ MUST do additional testing before proceeding to Phase 10.**
+- **Improved Debug View:** Shows chunk timing, full text per chunk, detected actions with source sentences
+- **Testing Status (2026-02-17):** ✅ Detects real action items, filters poem/narrative false positives
 
-### 📋 Remaining Phases (10-11)
-10. Monetization (StoreKit 2)
-11. Polish & App Store Readiness
+### ✅ Phase 10: Monetization (StoreKit 2) — COMPLETE
+- **StoreService:** `@MainActor @Observable` singleton using StoreKit 2 (`Product.products`, `Transaction.currentEntitlements`, `Transaction.updates`)
+- **Product:** `com.jpcostan.Pulse.pro.lifetime` — $5.99 one-time non-consumable purchase
+- **Free Tier:** Unlimited recordings, all features, 3-minute max per recording
+- **Pro Tier:** Unlimited recording length (up to existing 60-min cap)
+- **Gate:** Recording auto-stops at 3 minutes for free users → PaywallView presented as sheet
+- **PaywallView:** Shows branding, feature list, price, purchase button, restore purchases link
+- **SettingsView:** Account status (Free/Pro), upgrade button, restore purchases, Live Activity instructions, app version/build
+- **HomeView:** Added gear icon toolbar button linking to SettingsView
+- **StoreKit Config:** `Configuration.storekit` for simulator testing with sandbox purchases
+- **PulseApp:** StoreService initialized at launch for early entitlement loading
+
+**Files Created:**
+- `Services/StoreService.swift`
+- `Views/PaywallView.swift`
+- `Views/SettingsView.swift`
+- `Configuration.storekit`
+
+**Files Modified:**
+- `Services/AudioRecordingService.swift` — Added `freeLimitDuration` (3 min), `didHitFreeLimit` published property, free limit check in timer
+- `Views/RecordingView.swift` — Observes `didHitFreeLimit`, presents PaywallView sheet, handles free limit stop
+- `Views/HomeView.swift` — Added settings gear button in toolbar
+- `PulseApp.swift` — Initializes StoreService.shared at launch
+
+### 📋 Phase 11: Polish & App Store Readiness (NEXT)
+- **Onboarding Flow:** Modal walkthrough screens on first launch explaining app features; final slide includes Pro purchase prompt
+- **Free-Mode UX:** Subtle indicator on RecordingView showing "Free — 3 min limit" so users know before the cutoff hits
+- **Siri Shortcuts Debugging:** Phase 8 code compiles but Siri doesn't recognize commands on device — needs root cause fix
+- **Permission Explanations:** Review all permission request strings for clarity
+- **Error Handling Pass:** Audit all error paths for user-friendly messaging
+- **Performance Pass:** Profile memory/CPU during long recordings and transcription
+- **App Icon & Launch Screen:** Final assets
+- **App Store Copy & Screenshots:** Prepare store listing materials
+- **Privacy Disclosures:** App Store privacy nutrition labels
+- **App Review Checklist:** Ensure compliance with App Store guidelines
+
+### 📋 Phase 12: End-to-End Testing
+Comprehensive testing across all app flows and edge cases:
+
+**12.1 — Recording Flow (Free Tier)**
+- Start recording → verify timer runs and audio level indicator works
+- Hit 3-minute mark → verify auto-stop, paywall appears, recording saved
+- Dismiss paywall without purchasing → verify 3-min recording proceeds to processing
+- Purchase from paywall → verify Pro status updates immediately
+
+**12.2 — Recording Flow (Pro Tier)**
+- Start recording → record past 3 minutes → verify no cutoff
+- Reach 45-minute mark → verify warning alert appears
+- Reach 60-minute mark → verify auto-stop with graceful save
+- Cancel recording → verify meeting deleted and audio file cleaned up
+
+**12.3 — Background Recording & Live Activity**
+- Start recording → lock device → verify recording continues in background
+- Start recording → switch to another app → verify recording continues
+- Verify Live Activity timer updates on lock screen while device locked
+- Tap Live Activity → verify deep link returns to RecordingView
+- End recording while in background → verify Live Activity dismissed
+
+**12.4 — Transcription Pipeline**
+- Short recording (< 30s) → verify single-chunk transcription
+- Long recording (> 30s) → verify multi-chunk transcription with correct ordering
+- Verify chunk overlap (2s) doesn't create duplicate words at boundaries
+- Chunk retry on failure → verify resilience
+- On-device model not downloaded → verify user-friendly error message guiding to Settings
+- Empty/silent recording → verify graceful handling
+
+**12.5 — Action Detection**
+- Recording with clear action items → verify detection with appropriate confidence scores
+- Recording with no action items → verify empty state in ActionReviewView
+- False positive resistance: narrative/poem text → verify no spurious detections
+- Negation filtering ("don't call him") → verify filtered out
+- Question filtering ("Should we do X?") → verify filtered; but "Can you send the report?" → verify detected
+- Generic patterns with task context ("I'll schedule the meeting") → verify detected
+- Generic patterns without task context ("I'll be fine") → verify filtered
+
+**12.6 — Action Review & Editing**
+- Manual action creation via "+" button → verify new item appears, title editable
+- Edit action item title inline → verify saved to Core Data
+- Date picker: set due date → verify saved; remove date → verify removed
+- Toggle include/exclude → verify persists
+- Expand source sentence → verify correct sentence shown
+- Confidence-sorted display → verify highest first
+
+**12.7 — Reminders & Calendar (EventKit)**
+- Create reminders from included action items → verify appear in Apple Reminders app
+- Create calendar events for items with due dates → verify appear in Calendar app
+- Sync status badges ("Synced to Reminders" / "In Calendar") → verify shown after creation
+- Deny Reminders permission → verify graceful handling and clear error message
+- Deny Calendar permission → verify graceful handling
+- Items without due dates → verify no calendar event created
+
+**12.8 — Monetization / StoreKit**
+- Purchase flow (StoreKit sandbox) → verify isPro updates, paywall dismisses
+- Restore purchases → verify entitlement restored and UI updates
+- Kill and relaunch app → verify Pro status persists across launches
+- Product loading failure (no network in sandbox) → verify error message shown
+- User cancels purchase → verify no state change, paywall remains
+- Settings view: Free user → shows "Free" + "Upgrade to Pro"; Pro user → shows "Pro — Lifetime"
+
+**12.9 — Onboarding (Phase 11 feature)**
+- First launch → verify onboarding appears automatically
+- Walk through all slides → verify content and flow
+- Purchase from final slide → verify Pro status activates
+- Skip/dismiss onboarding → verify app works in free mode
+- Second launch → verify onboarding does NOT appear again
+- Fresh install → verify onboarding triggers again
+
+**12.10 — Settings**
+- Free user: shows "Free" status badge and "Upgrade to Pro" button
+- Pro user: shows "Pro — Lifetime" confirmation, no upgrade button
+- Restore purchases button → verify works (covered in 12.8)
+- Live Activity section → verify instructional text present
+- App version and build number → verify correct values from Bundle
+
+**12.11 — Navigation & Flow**
+- Full happy path: Home → Recording → Processing → Action Review → Summary → Home
+- Cancel recording mid-flow → verify returns to Home, meeting deleted from Core Data
+- View past meeting via MeetingDetailView → verify transcript, actions, audio player
+- Delete meeting from Home list (swipe to delete) → verify removed from Core Data
+- Deep link `pulse://recording` → verify navigates to active recording
+- Pop-to-root after Summary → verify clean navigation state
+
+**12.12 — Audio Playback (MeetingDetailView)**
+- Play/pause recorded audio → verify controls work
+- Skip forward/backward → verify seek positions
+- Audio file exists → verify playback works
+- Audio file deleted (user chose cleanup) → verify graceful handling (no crash)
+
+**12.13 — Data Persistence & Core Data**
+- Kill app during processing → verify partial data saved (transcript chunks)
+- Kill app after completion → verify meeting, transcript, actions all intact
+- Core Data relationships: Meeting → TranscriptChunks, Meeting → ActionItems → verify integrity
+- TranscriptChunks ordered by `order` field → verify correct sequence
+- ActionItem identifiers (reminder/calendar) → verify stored and retrievable
+
+**12.14 — Edge Cases & Error Handling**
+- No microphone permission → verify clear error message directing to Settings
+- No speech recognition permission → verify clear error message
+- Low battery (< 20%) at recording start → verify warning shown
+- Low storage (< 500MB) at recording start → verify warning shown
+- Audio interruption (incoming phone call during recording) → verify pause/resume
+- Route change (headphones unplugged) → verify recording continues with built-in mic
+- Very short recording (< 5 seconds) → verify transcription handles gracefully
+- Very long meeting title → verify UI doesn't break
+- Rapid start/stop recording → verify no crashes or stale state
+
+**12.15 — Siri Shortcuts (if fixed in Phase 11)**
+- "Start a meeting in Pulse" → verify meeting created and RecordingView appears
+- "Stop meeting in Pulse" → verify recording stops and meeting saved
+- Start with custom title parameter → verify title applied
+- Shortcuts appear in Shortcuts app → verify listed
+- No active recording + "Stop meeting" → verify graceful error
+
+**12.16 — Performance & Stability**
+- Memory usage during 30+ minute recording → verify no memory leaks
+- CPU usage during transcription of long recording → verify reasonable
+- App launch time → verify under 2 seconds
+- UI responsiveness during processing (spinner, no freezes)
+- Multiple meetings in list (20+) → verify scroll performance
+
+**12.17 — App Store Readiness Checks**
+- All permission strings present in Info.plist and worded clearly
+- Privacy nutrition labels accurate (microphone, speech recognition, no data collection)
+- No crashes on cold launch
+- No crashes on any supported device size
+- StoreKit product approved in App Store Connect
+- App icon renders correctly at all sizes
+- Launch screen displays properly
 
 ---
 
-## Recent Session Summary (2026-02-13)
+## Recent Session Summary (2026-02-19)
 
-### Phase 9 IMPLEMENTED: Transcription & Action Item Refinement — NEEDS MORE TESTING
+### Phase 10 COMPLETED: Monetization (StoreKit 2) ✅
 
-**Code Changes (4 files modified):**
-
-1. **ActionDetectionService.swift** — Major enhancements:
-   - Added 17 new action patterns (intent phrases, task markers, phrasal verbs, deadline indicators)
-   - Added corresponding prefix removals in `extractActionTitle`
-   - Negation detection: filters "don't send that email" but keeps "don't forget to..."
-   - Question filtering: filters "Should we reconsider?" but keeps "Can you send the report?"
-   - Enhanced date parsing: "in X days/weeks/months", "within a week", "ASAP", "end of month"
-   - Time-of-day extraction: "by 3pm", "before noon", "eod" → enriches dates with time
-   - **False positive guards:** Sentences <3 words or >200 chars skipped; extracted titles <2 words skipped
-
-2. **TranscriptionService.swift** — Reliability improvements:
-   - 2-second overlap between chunks (28s stride for 30s chunks) to prevent word loss at boundaries
-   - Retry logic: 1 retry per failed chunk with 500ms delay (2 attempts total)
-
-3. **ActionReviewView.swift** — User editing capabilities:
-   - "+" toolbar button for manual action item creation (empty title, 100% confidence, auto-focused)
-   - Date picker sheet on action items with graphical DatePicker + time component
-   - "Remove Date" and "Done" buttons in date picker
-   - Time display on action items that have time-of-day set
-
-4. **MeetingDetailView.swift** — Editable transcript:
-   - "Edit"/"Done" toggle button in Transcript section header
-   - Edit mode: TextEditor fields per chunk
-   - Saves edited text to Core Data on "Done"
+**Implementation:**
+- Created `StoreService` using StoreKit 2 async APIs — loads products, listens for transaction updates, checks entitlements on launch
+- Created `PaywallView` — presented as sheet when free user hits 3-minute recording limit
+- Created `SettingsView` — account status, upgrade/restore buttons, Live Activity guide, app version
+- Created `Configuration.storekit` — local StoreKit testing config for simulator
+- Modified `AudioRecordingService` — added 3-minute free limit check in timer callback, `didHitFreeLimit` flag
+- Modified `RecordingView` — observes `didHitFreeLimit`, presents paywall sheet, handles auto-stop gracefully
+- Modified `HomeView` — added gear icon in toolbar for settings navigation
+- Modified `PulseApp` — initializes `StoreService.shared` at launch
 
 **Build Status:** ✅ Build successful
 
-**Testing Results:**
-- Test 1 (action item → poem → action item): Detected 2 real actions ✅ but also 2 false positives ❌ — the word "see" (90% confidence) and entire poem (82% confidence) were incorrectly flagged
-- Root cause: Short fragments matching action patterns after prefix removal; long text containing incidental action words
-- Fix applied: Added sentence length guards (min 3 words, max 200 chars) and title length guard (min 2 words)
-- Test 2 (same format, after fix): Only detected 1 of 2 action items — false positives eliminated but possibly over-filtering
-- **⚠️ More testing needed** — may need to adjust length thresholds or investigate if the missing action item is a transcription boundary issue vs. a filtering issue
+---
 
-**Next Steps:**
-1. Test again with varied action item phrasings to diagnose why second action item was missed
-2. Check Console.app logs (`subsystem:com.jpcostan.Pulse`) to see if the action item was transcribed but filtered, or not transcribed at all
-3. Adjust filters if over-filtering is confirmed
-4. Once action detection is reliable, proceed to Phase 10
+## Previous Session Summary (2026-02-17)
+
+### Phase 9 COMPLETED: Action Detection False Positive Fix ✅
+
+**Problem:** Generic commitment patterns ("I'll", "we should", "let's") matched poem/narrative lines as false positives at 90% confidence, while some real action items were being over-filtered.
+
+**Solution: Two-Tier Pattern System**
+- Added `requiresTaskContext` flag to each pattern in `actionPatterns` array
+- Generic patterns (i'll, we should, let's, i must, etc.) → `requiresTaskContext: true`
+- Specific patterns (^send, follow up, due by, meeting, don't forget, etc.) → `requiresTaskContext: false`
+- New `hasTaskIndicators()` method validates generic matches against task verbs (~60), task nouns (~30), time indicators (~20), and time patterns
+- Generic patterns that fail validation `continue` to next pattern (don't reject sentence entirely)
+
+**Additional Fixes:**
+- Relaxed title filter: 1-word titles allowed unless they're stop words (was: minimum 2 words)
+- Added patterns: "due at", "due today/tonight/tomorrow", "i have a meeting/homework/appointment"
+- Added diagnostic logging for every filter decision
+- Improved debug transcript view with chunk timing and action summary
+- Reverted experimental chunk deduplication (was untested, could corrupt transcripts)
+
+**Testing:** ✅ Detects real action items, filters poem false positives
+
+**Git Repo Fix:** Removed nested `.git` from `Pulse/` directory. All files now tracked by outer repo. Added `.gitignore`. Pushed to GitHub.
+
+**Files Modified:**
+- `Services/ActionDetectionService.swift` — Two-tier patterns, task context validation, stop-word filter, diagnostic logging
+- `Views/ActionReviewView.swift` — Enhanced debug transcript view
+- `Views/ProcessingView.swift` — Reverted chunk deduplication, back to ". " join
 
 ---
 
@@ -352,14 +520,17 @@ Pulse/
 │   │   ├── TranscriptionService.swift    # Chunked transcription (30s segments)
 │   │   ├── ActionDetectionService.swift  # NaturalLanguage + pattern matching
 │   │   ├── RemindersService.swift        # EventKit integration (Reminders + Calendar)
+│   │   ├── StoreService.swift            # StoreKit 2 IAP (Pro lifetime purchase)
 │   │   └── LoggingService.swift          # Centralized os.Logger for debugging
 │   ├── Views/
-│   │   ├── HomeView.swift          # Main screen, meetings list + deep linking
-│   │   ├── RecordingView.swift     # Active recording UI + Live Activity management
+│   │   ├── HomeView.swift          # Main screen, meetings list + deep linking + settings
+│   │   ├── RecordingView.swift     # Active recording UI + Live Activity + paywall gate
 │   │   ├── ProcessingView.swift    # Transcription + action detection
 │   │   ├── ActionReviewView.swift  # Review detected actions (real data)
 │   │   ├── SummaryView.swift       # Completion screen + audio cleanup
-│   │   └── MeetingDetailView.swift # View past meeting details
+│   │   ├── MeetingDetailView.swift # View past meeting details
+│   │   ├── PaywallView.swift       # Pro upgrade paywall sheet
+│   │   └── SettingsView.swift      # Settings: account, restore, about
 │   └── Assets.xcassets/
 ├── PulseWidgets/                   # Widget Extension for Live Activities
 │   ├── PulseWidgetsLiveActivity.swift   # Live Activity UI (lock screen + Dynamic Island)
@@ -425,9 +596,16 @@ Pulse/
 18. **Audio Session for Background:** Do NOT use `.mixWithOthers` — it prevents iOS from keeping the app alive in background for recording
 19. **AudioRecordingService Singleton:** Shared instance (`AudioRecordingService.shared`) so both UI and App Intents access the same recorder
 20. **Siri Integration:** App Intents with `openAppWhenRun = true` for Start (needs UI), background for Stop (just stops recording)
-21. **False Positive Guards:** Sentence length (3-200 words/chars) and title length (2+ words) filters to prevent fragments and long non-action text from triggering patterns
-22. **Chunk Overlap:** 2-second overlap between transcription chunks prevents word loss at boundaries
-23. **Chunk Retry:** 1 retry per failed transcription chunk with 500ms delay for resilience
+21. **Two-Tier Action Patterns:** Generic commitment patterns (i'll, we should, let's) require task context validation; specific patterns (send, meeting, due by) pass directly
+22. **Task Context Validation:** Sentences matching generic patterns must contain a task verb, task noun, or time reference to avoid poem/narrative false positives
+23. **False Positive Guards:** Sentence length (3-200 words/chars), stop-word title filter (rejects "see", "that" but allows "call", "send")
+24. **Chunk Overlap:** 2-second overlap between transcription chunks prevents word loss at boundaries
+25. **Chunk Retry:** 1 retry per failed transcription chunk with 500ms delay for resilience
+26. **Git Structure:** Single repo at `pulse/` level; inner `Pulse/.git` removed. `.gitignore` excludes xcuserdata, DerivedData, .DS_Store, .claude/
+27. **Monetization Model:** One-time $5.99 lifetime purchase (non-consumable). Free users get all features but 3-min recording cap. Pro removes the cap.
+28. **StoreKit 2:** Uses modern async/await API — `Product.products(for:)`, `Transaction.currentEntitlements`, `Transaction.updates` listener
+29. **Free Limit Gate:** Recording auto-stops at 3 minutes for free users, saves what was captured, presents paywall sheet. After dismiss, proceeds to processing with the 3-min recording.
+30. **StoreService Pattern:** `@MainActor @Observable` singleton accessed directly via `StoreService.shared` (not environment injection — simpler for service-to-service access in AudioRecordingService)
 
 ---
 
@@ -435,12 +613,7 @@ Pulse/
 
 Tell the next Claude session:
 
-> "Read CLAUDE.md for project context. Phases 0-7 are complete. Phase 8 code is written (Siri not working on device). Phase 9 code is complete but NEEDS MORE TESTING — last test only detected 1 of 2 action items. Must verify action detection reliability before proceeding to Phase 10."
-
-**Debugging tips for Phase 9 testing:**
-- Use Console.app with filter `subsystem:com.jpcostan.Pulse` to check if missing actions were transcribed but filtered, or not transcribed at all
-- Key filters that may over-filter: sentence min 3 words, sentence max 200 chars, title min 2 words
-- Check `ActionDetectionService.swift` lines ~245-290 for the length guards
+> "Read CLAUDE.md for project context. Phases 0-10 are complete and tested. Phase 8 (Siri) code is written but not working on device. Ready for Phase 11 (Polish & App Store Readiness), then Phase 12 (End-to-End Testing)."
 
 ---
 
@@ -464,4 +637,4 @@ xcodebuild -scheme Pulse -destination 'platform=iOS Simulator,name=iPhone 17' bu
 - **On-Device Model Required:** Transcription requires the on-device English speech recognition model to be downloaded. Users should go to Settings > General > Keyboard > Dictation and ensure the English language is downloaded for offline use.
 - **Spelled-out Numbers:** Now supports "at nine" → "at 9" conversion for date parsing. Covers one-twelve, noon, midnight.
 - **Siri Shortcuts NOT WORKING (2026-02-05):** Phase 8 code compiles and builds but "Hey Siri, start a meeting with Pulse" does not trigger the shortcut on physical device. Needs debugging. Check: shortcut registration, Siri phrase matching, Shortcuts app visibility, and whether `AppShortcutsProvider` is being picked up by the system.
-- **Action Detection May Over-Filter (2026-02-13):** After adding false positive guards (sentence length 3-200 chars, title min 2 words), Test 2 only detected 1 of 2 action items. Need to determine if the missing item was not transcribed or was filtered out. Check Console.app logs for "ACTION FOUND" and "Sentence X:" entries to diagnose.
+- **Action Detection Over-Filtering RESOLVED (2026-02-17):** Previous false positive guards (title min 2 words) were too strict. Replaced with two-tier pattern system + stop-word title filter. Tested and working.

@@ -29,6 +29,13 @@ struct HomeView: View {
             }
             .navigationTitle("Pulse")
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: startNewMeeting) {
                         Image(systemName: "mic.circle.fill")

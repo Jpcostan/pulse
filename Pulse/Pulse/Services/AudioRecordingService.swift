@@ -18,6 +18,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
 
     static let maxRecordingDuration: TimeInterval = 60 * 60  // 60 minutes
     static let warningThreshold: TimeInterval = 45 * 60      // 45 minutes
+    static let freeLimitDuration: TimeInterval = 3 * 60      // 3 minutes
     static let lowBatteryThreshold: Float = 0.20             // 20%
     static let lowStorageThreshold: Int64 = 500 * 1024 * 1024 // 500MB
 
@@ -29,6 +30,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
     @Published private(set) var error: AudioRecordingError?
     @Published private(set) var showDurationWarning = false
     @Published private(set) var didAutoStop = false
+    @Published private(set) var didHitFreeLimit = false
     @Published private(set) var remainingTime: TimeInterval = maxRecordingDuration
     @Published private(set) var autoStopResult: (url: URL, duration: TimeInterval)?
 
@@ -193,6 +195,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         self.error = nil
         showDurationWarning = false
         didAutoStop = false
+        didHitFreeLimit = false
         autoStopResult = nil
 
         // Start timers
@@ -323,6 +326,13 @@ final class AudioRecordingService: NSObject, ObservableObject {
 
                 // Update Live Activity
                 self.updateLiveActivity()
+
+                // Check free tier limit (3 minutes)
+                if !StoreService.shared.isPro && self.currentTime >= Self.freeLimitDuration {
+                    self.autoStopResult = self.stopRecording()
+                    self.didHitFreeLimit = true
+                    return
+                }
 
                 // Check for warning threshold (45 minutes)
                 if self.currentTime >= Self.warningThreshold && !self.hasShownDurationWarning {
