@@ -7,6 +7,7 @@ import Foundation
 @preconcurrency import EventKit
 import CoreData
 import Combine
+import os
 
 @MainActor
 final class RemindersService: ObservableObject {
@@ -75,7 +76,7 @@ final class RemindersService: ObservableObject {
             }
             return granted
         } catch {
-            NSLog("Reminders access request failed: %@", error.localizedDescription)
+            Log.reminders.error("Reminders access request failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -89,7 +90,7 @@ final class RemindersService: ObservableObject {
             }
             return granted
         } catch {
-            NSLog("Calendar access request failed: %@", error.localizedDescription)
+            Log.reminders.error("Calendar access request failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -140,7 +141,7 @@ final class RemindersService: ObservableObject {
         for item in actionItems {
             // Skip items that already have a reminder
             if item.reminderIdentifier != nil {
-                NSLog("Skipping item '%@' - already has reminder", item.title ?? "Untitled")
+                Log.reminders.info("Skipping item '\(item.title ?? "Untitled")' - already has reminder")
                 continue
             }
 
@@ -183,10 +184,10 @@ final class RemindersService: ObservableObject {
                 }
 
                 createdCount += 1
-                NSLog("Created reminder: %@ (ID: %@)", reminder.title ?? "", reminderIdentifier)
+                Log.reminders.info("Created reminder: \(reminder.title ?? "") (ID: \(reminderIdentifier))")
 
             } catch {
-                NSLog("Failed to create reminder for '%@': %@", item.title ?? "", error.localizedDescription)
+                Log.reminders.error("Failed to create reminder for '\(item.title ?? "")': \(error.localizedDescription)")
             }
         }
 
@@ -225,7 +226,7 @@ final class RemindersService: ObservableObject {
 
             // Skip items that already have a calendar event
             if item.calendarEventIdentifier != nil {
-                NSLog("Skipping item '%@' - already has calendar event", item.title ?? "Untitled")
+                Log.reminders.info("Skipping item '\(item.title ?? "Untitled")' - already has calendar event")
                 continue
             }
 
@@ -264,10 +265,10 @@ final class RemindersService: ObservableObject {
                 }
 
                 createdCount += 1
-                NSLog("Created calendar event: %@ (ID: %@)", event.title ?? "", eventIdentifier ?? "")
+                Log.reminders.info("Created calendar event: \(event.title ?? "") (ID: \(eventIdentifier ?? ""))")
 
             } catch {
-                NSLog("Failed to create calendar event for '%@': %@", item.title ?? "", error.localizedDescription)
+                Log.reminders.error("Failed to create calendar event for '\(item.title ?? "")': \(error.localizedDescription)")
             }
         }
 

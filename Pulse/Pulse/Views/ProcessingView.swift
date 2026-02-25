@@ -125,16 +125,13 @@ struct ProcessingView: View {
     }
 
     private func startProcessingIfNeeded() async {
-        NSLog("=== PROCESSING VIEW START ===")
         guard !hasStartedProcessing else {
-            NSLog("Already started processing, returning")
             return
         }
         hasStartedProcessing = true
 
         // Get audio file URL
         guard let audioPath = meeting.audioFilePath else {
-            NSLog("ERROR: No audio file path on meeting")
             // No audio file - skip to review
             meeting.status = "completed"
             try? viewContext.save()
@@ -142,7 +139,6 @@ struct ProcessingView: View {
             return
         }
 
-        NSLog("Audio path: %@", audioPath)
         let audioURL = URL(fileURLWithPath: audioPath)
 
         // Phase 1: Transcription
@@ -168,17 +164,6 @@ struct ProcessingView: View {
         // Get transcript text from meeting's transcript chunks
         let transcriptText = getTranscriptText()
 
-        // DEBUG: Log what we're passing to action detection
-        NSLog("=== ACTION DETECTION DEBUG ===")
-        let chunks = meeting.transcriptChunks as? Set<TranscriptChunk> ?? []
-        NSLog("Number of transcript chunks: %d", chunks.count)
-        for chunk in chunks.sorted(by: { $0.order < $1.order }) {
-            NSLog("Chunk %d: '%@' (length: %d)", chunk.order, chunk.text ?? "nil", chunk.text?.count ?? 0)
-        }
-        NSLog("Combined transcript text length: %d", transcriptText.count)
-        NSLog("Combined transcript text: %@", transcriptText)
-        NSLog("==============================")
-
         if !transcriptText.isEmpty {
             do {
                 let _ = try await actionDetectionService.detectActions(
@@ -187,8 +172,7 @@ struct ProcessingView: View {
                     context: viewContext
                 )
             } catch {
-                // Action detection errors are non-fatal, just log and continue
-                print("Action detection warning: \(error)")
+                // Action detection errors are non-fatal
             }
         }
 

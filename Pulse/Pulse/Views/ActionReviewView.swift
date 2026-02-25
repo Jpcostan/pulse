@@ -65,13 +65,7 @@ struct ActionReviewView: View {
                         )
                     }
 
-                    // Debug section - shows transcript chunks
-                    Section("Debug: Transcript") {
-                        Text(transcriptDebugText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+}
                 .listStyle(.plain)
             }
 
@@ -185,39 +179,6 @@ struct ActionReviewView: View {
                 .padding(.horizontal)
             Spacer()
         }
-    }
-
-    /// Debug: Get the full transcript text for display
-    private var transcriptDebugText: String {
-        guard let chunks = meeting.transcriptChunks as? Set<TranscriptChunk> else {
-            return "[No transcript chunks]"
-        }
-        let sortedChunks = chunks.sorted { $0.order < $1.order }
-        let texts = sortedChunks.compactMap { $0.text }
-
-        var output = "Chunks: \(texts.count)\n"
-        output += "Combined length: \(texts.joined(separator: ". ").count) chars\n\n"
-
-        for (i, chunk) in sortedChunks.enumerated() {
-            let text = chunk.text ?? "[nil]"
-            output += "--- Chunk \(i) (\(String(format: "%.1f", chunk.startTime))-\(String(format: "%.1f", chunk.endTime))s) ---\n"
-            output += text + "\n\n"
-        }
-
-        // Show detected items for cross-reference
-        let items = actionItems
-        if !items.isEmpty {
-            output += "--- Detected Actions ---\n"
-            for item in items {
-                output += "• \(item.title ?? "?") [\(Int(item.confidence * 100))%]\n"
-                if let source = item.sourceSentence {
-                    output += "  Source: \"\(source)\"\n"
-                }
-            }
-        }
-
-        output += "\n(Check Console.app → subsystem:com.jpcostan.Pulse for full filter log)"
-        return output
     }
 
     private func createReminders() {

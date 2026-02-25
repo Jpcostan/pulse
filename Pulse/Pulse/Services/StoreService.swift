@@ -4,6 +4,7 @@
 //
 
 import StoreKit
+import os
 
 @MainActor
 @Observable
@@ -33,7 +34,7 @@ final class StoreService {
             let products = try await Product.products(for: [Self.productID])
             product = products.first
         } catch {
-            NSLog("StoreService: Failed to load products: \(error)")
+            Log.general.error("StoreService: Failed to load products: \(error)")
         }
     }
 
@@ -62,7 +63,7 @@ final class StoreService {
             }
         } catch {
             purchaseError = "Purchase failed: \(error.localizedDescription)"
-            NSLog("StoreService: Purchase error: \(error)")
+            Log.general.error("StoreService: Purchase error: \(error)")
         }
     }
 

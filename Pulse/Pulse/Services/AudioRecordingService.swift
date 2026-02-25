@@ -7,6 +7,7 @@ import AVFoundation
 import Combine
 import UIKit
 import ActivityKit
+import os
 
 @MainActor
 final class AudioRecordingService: NSObject, ObservableObject {
@@ -461,7 +462,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         // with proper audio session configuration and background mode
         Task { @MainActor in
             if isRecording {
-                NSLog("App going to background - recording continues")
+                Log.audio.info("App going to background - recording continues")
             }
         }
     }
@@ -470,7 +471,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         // App returning to foreground
         Task { @MainActor in
             if isRecording {
-                NSLog("App returned to foreground - recording active")
+                Log.audio.info("App returned to foreground - recording active")
                 // Ensure audio session is still active
                 try? AVAudioSession.sharedInstance().setActive(true)
             }
@@ -501,7 +502,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
                 pushType: nil
             )
         } catch {
-            NSLog("Failed to start Live Activity: \(error.localizedDescription)")
+            Log.audio.error("Failed to start Live Activity: \(error.localizedDescription)")
         }
     }
 

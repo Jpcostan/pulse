@@ -17,9 +17,6 @@ struct PulseApp: App {
     @State private var showOnboarding = false
 
     init() {
-        NSLog("🚀 PULSE APP LAUNCHED 🚀")
-        print("🚀 PULSE APP LAUNCHED (print) 🚀")
-
         // Register App Shortcuts with Siri
         PulseShortcuts.updateAppShortcutParameters()
     }

@@ -11,8 +11,6 @@ import SwiftUI
 @main
 struct PulseWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        PulseWidgets()
-        PulseWidgetsControl()
         PulseWidgetsLiveActivity()
     }
 }
