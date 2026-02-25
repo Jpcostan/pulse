@@ -1,5 +1,7 @@
 I am building an iOS app called Pulse — Turn Meetings Into Actions.
 
+**IMPORTANT — Naming:** "Pulse" was taken on the App Store, so the app is publicly named **"Pulsio"**. The Xcode target name is "Pulsio", the Swift module is "Pulsio", and the built product is `Pulsio.app`. Internal/structural names (project file, scheme, Core Data model, source folders, bundle ID `com.jpcostan.Pulse`) still use "Pulse". Tests must use `@testable import Pulsio`. See CLAUDE.md "Naming: Pulse vs Pulsio" section for the full mapping.
+
 I am a solo developer and will upload a PDF white paper that fully defines the product vision, scope, UX philosophy, architecture, and constraints.
 Treat that white paper as the primary source of truth.
 
@@ -7,7 +9,7 @@ Your task is to help me implement this app step by step, keeping scope disciplin
 
 App Overview
 
-Pulse is a privacy-first iOS app that:
+Pulse (marketed as "Pulsio") is a privacy-first iOS app that:
 
 Records meetings (audio only)
 
@@ -378,7 +380,7 @@ All scenarios documented below must be executed on a physical device.
 Done when:
 All manual test scenarios pass on a physical device with no crashes or unexpected behavior.
 
-13) Unit Testing (XCTest — Target 70%+ Code Coverage)
+13) Unit Testing (Swift Testing — 121 Tests) ✅ COMPLETE
 
 Write XCTest unit tests in the PulseTests target covering service logic, data models,
 and view model behavior. Use in-memory Core Data contexts for isolation. Target 70%+
@@ -953,4 +955,4 @@ MUST test on physical iPhone (Live Activities don't work in simulator):
 - App Review Checklist
 
 ### To Resume
-> "Read CLAUDE.md and prompt.md for project context. Phase 11 code polish is done. Remaining Phase 11 items are non-code (Siri debugging, performance profiling, App Store assets). Ready for Phase 12 (Manual Testing), Phase 13 (Unit Testing), Phase 14 (App Store Submission), Phase 15 (Codebase Analysis)."
+> "Read CLAUDE.md and prompt.md for project context. Phases 0-11 and 13 complete. 121 unit tests passing with CI pipeline on GitHub Actions. Ready for Phase 12 (Manual Testing), Phase 14 (App Store Submission), or Phase 15 (Codebase Analysis + 15.1 Naming Audit)."

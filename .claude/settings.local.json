@@ -4,7 +4,15 @@
       "Bash(xcodebuild:*)",
       "Bash(git commit:*)",
       "Bash(find:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(nm:*)",
+      "Bash(cd:*)",
+      "Bash(xcrun xccov:*)",
+      "Bash(git status:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

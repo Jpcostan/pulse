@@ -1,16 +1,46 @@
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
 # Xcode user-specific
 xcuserdata/
 *.xcuserstate
+*.xcworkspace/xcuserdata/
 
 # Xcode build
 DerivedData/
 build/
+*.ipa
+
+# Xcode debug
+*.xcbkptlist
+*.xcscmblueprint
 
 # Claude Code local settings
 .claude/
 
-# Xcode debug
-*.xcbkptlist
+# Signing & credentials
+*.p12
+*.mobileprovision
+*.cer
+*.pem
+*.key
+
+# Secrets / environment
+.env
+.env.*
+secrets.*
+credentials.*
+
+# Test output
+*.xcresult
+TestResults/
+
+# SPM
+.build/
+Package.resolved
+
+# Misc
+*.log
+Thumbs.db

@@ -1,8 +1,8 @@
 # Pulse - Claude Development Context
 
-> **Last Updated:** 2026-02-24
-> **Current Status:** Phase 11 IN PROGRESS — Code polish items complete
-> **Next Phase:** Phase 11 remaining (non-code tasks), then Phase 12 (Manual Testing)
+> **Last Updated:** 2026-02-25
+> **Current Status:** Phase 13 COMPLETE — 121 unit tests passing, CI pipeline configured
+> **Next Phase:** Phase 12 (Manual Testing on physical device), then Phase 14 (App Store Submission)
 
 ---
 
@@ -327,8 +327,8 @@ Comprehensive manual test pass on a physical device covering every user-facing f
 - App icon renders correctly at all sizes
 - Launch screen displays properly
 
-### 📋 Phase 13: Unit Testing (XCTest — Target 70%+ Code Coverage)
-Write XCTest unit tests in the PulseTests target. Use in-memory Core Data contexts for test isolation. Target 70%+ line coverage across testable code.
+### ✅ Phase 13: Unit Testing (Swift Testing — 121 Tests Passing) — COMPLETE
+Implemented comprehensive unit tests using Swift Testing framework (`@Test` macro). In-memory Core Data contexts for test isolation. ActionDetectionService at 88.89% coverage, Persistence at 86.67%.
 
 **13.1 — ActionDetectionService Tests** (highest priority — 773 LOC)
 - Sentence segmentation: single sentence, multiple sentences, empty string
@@ -452,9 +452,63 @@ Analyze the entire codebase for anything unnecessary that could or should be rem
 - Redundant dependencies or frameworks
 - Any development-only features that shouldn't ship to production
 
+**15.1 — Pulse/Pulsio Naming Audit**
+Verify the Pulse→Pulsio naming split doesn't cause issues at deployment. Check:
+- `CFBundleDisplayName` = "Pulsio" in both Debug and Release build configs
+- `CFBundleName` (if set) matches or is compatible with "Pulsio"
+- Bundle ID `com.jpcostan.Pulse` matches what's registered in App Store Connect
+- App Store Connect app name "Pulsio" matches `CFBundleDisplayName`
+- IAP product ID `com.jpcostan.Pulse.pro.lifetime` is registered in App Store Connect (uses "Pulse" in bundle ID — confirm this works)
+- Siri shortcut phrases reference "Pulsio" (not "Pulse") in `PulseShortcuts.swift`
+- All user-facing permission strings say "Pulsio" (not "Pulse")
+- URL scheme `pulse://` still works (internal, not user-visible — OK to keep)
+- No stale references to "Pulse" in user-visible strings (alerts, onboarding, settings, paywall)
+- App icon metadata and launch screen don't contain "Pulse" text
+- TestFlight and App Store screenshots/descriptions use "Pulsio"
+
 ---
 
-## Recent Session Summary (2026-02-24)
+## Recent Session Summary (2026-02-25)
+
+### Phase 13 Unit Testing Complete — 121 Tests Passing
+
+**Test Files Created (12 files):**
+- `TestHelpers.swift` — shared `makeInMemoryContext()` and `makeMeeting()` utilities
+- `ActionDetectionTests.swift` — 42 tests: patterns, two-tier system, negation, questions, false positives, dedup, confidence
+- `DateParsingTests.swift` — 15 tests: explicit dates, relative, weekdays, ASAP, EOD, end-of-month, time-of-day
+- `AudioRecordingServiceTests.swift` — 13 tests: constants, URL gen, formatted time, error descriptions
+- `TranscriptionServiceTests.swift` — 11 tests: error descriptions, error equality, cancellation, initial state
+- `CoreDataModelTests.swift` — 9 tests: entity creation, relationships, cascade delete, round-trip
+- `PersistenceControllerTests.swift` — 4 tests: in-memory container, preview, merge policy, auto-merge
+- `RecordingActivityAttributesTests.swift` — 4 tests: Codable round-trip, Hashable
+- `IntentTests.swift` — 3 tests: singleton, default nil, observable
+- `AudioPlaybackServiceTests.swift` — 6 tests: initial state, cleanup, errors, load non-existent
+- `RemindersServiceTests.swift` — 6 tests: all error descriptions
+- `StoreServiceTests.swift` — DELETED (`@Observable` types inaccessible from test target with MemberImportVisibility)
+
+**Build/Config Fixes:**
+- Added PulseTests target to scheme's TestAction with code coverage enabled
+- Fixed TEST_HOST from `Pulse.app/Pulse` → `Pulsio.app/Pulsio` (Debug + Release)
+- Changed all test files from `@testable import Pulse` → `@testable import Pulsio`
+- Added explicit framework imports per MemberImportVisibility requirement
+
+**Coverage:** ActionDetectionService 88.89%, Persistence 86.67%, overall app 24.61% (views untestable without UI tests)
+
+**Naming Documentation Added:**
+- Added "Naming: Pulse vs Pulsio" section to CLAUDE.md with full mapping table
+- Updated prompt.md header with naming note
+- Added Phase 15.1 naming audit checklist for pre-deployment
+
+**CI Pipeline Created:**
+- `.github/workflows/tests.yml` — runs on every push, `macos-26` runner, Xcode 26.2, uploads test results artifact
+- `.gitignore` updated with signing certs, secrets, test output, SPM artifacts
+
+### To Resume
+> "Read CLAUDE.md and prompt.md for project context. Phase 13 unit testing is complete (121 tests passing). CI pipeline configured. Ready for Phase 12 (Manual Testing on physical device) or Phase 14 (App Store Submission). Phase 15 (Codebase Analysis) and Phase 15.1 (Naming Audit) still pending."
+
+---
+
+## Previous Session Summary (2026-02-24)
 
 ### Phase 11 Code Polish Complete
 
@@ -486,12 +540,9 @@ Analyze the entire codebase for anything unnecessary that could or should be rem
 **Phase 15 Added:**
 - Codebase Analysis phase added after Phase 14 — audit for dead code, debug artifacts, unused imports, and anything that shouldn't ship to production
 
-### To Resume
-> "Read CLAUDE.md and prompt.md for project context. Phase 11 code polish is done. Remaining Phase 11 items are non-code (Siri debugging, performance profiling, App Store assets). Ready for Phase 12 (Manual Testing) or Phase 13 (Unit Testing)."
-
 ---
 
-## Previous Session Summary (2026-02-23)
+## Older Session Summary (2026-02-23)
 
 ### First TestFlight Build Uploaded — Version 1.0 (3) ✅
 
@@ -824,7 +875,31 @@ Pulse/
 
 Tell the next Claude session:
 
-> "Read CLAUDE.md and prompt.md for project context. First TestFlight build (1.0 build 3) is uploaded. Phases 0-10 complete. Phase 11 code polish done (onboarding, free-mode UX, permissions, error handling). Remaining Phase 11 items are non-code (performance profiling, App Store assets, Siri debugging). Ready for Phase 12 (Manual Testing), Phase 13 (Unit Testing — 70%+ coverage), Phase 14 (App Store Submission), then Phase 15 (Codebase Analysis — remove dead code/debug artifacts before shipping)."
+> "Read CLAUDE.md and prompt.md for project context. Phases 0-11 and 13 are complete. 121 unit tests passing with CI pipeline on GitHub Actions. Ready for Phase 12 (Manual Testing on physical device), Phase 14 (App Store Submission), or Phase 15 (Codebase Analysis + 15.1 Naming Audit). Key note: the app is 'Pulse' internally but 'Pulsio' publicly — see Naming section in CLAUDE.md."
+
+---
+
+## Naming: "Pulse" vs "Pulsio"
+
+> **IMPORTANT:** "Pulse" was already taken on the App Store, so the app was renamed to **"Pulsio"** for public-facing purposes. This creates a split naming convention that must be kept consistent:
+
+| Context | Name | Why |
+|---------|------|-----|
+| **App Store / Display Name** | **Pulsio** | `CFBundleDisplayName = Pulsio` — what users see |
+| **Xcode Target Name** | **Pulsio** | The main app target is named "Pulsio" |
+| **Swift Module Name** | **Pulsio** | Derived from target name → `import Pulsio` in tests |
+| **Product (.app)** | **Pulsio.app** | Built product is `Pulsio.app` with executable `Pulsio` |
+| **Bundle ID** | `com.jpcostan.Pulse` | Original bundle ID, kept as-is (not user-visible) |
+| **Xcode Project** | `Pulse.xcodeproj` | Project file name, not changed |
+| **Xcode Scheme** | `Pulse` | Build scheme name |
+| **Core Data Model** | `Pulse.xcdatamodeld` | Model file name |
+| **Source Folder** | `Pulse/` | Filesystem directory name |
+| **Permission Strings** | "Pulsio records..." | User-facing strings use "Pulsio" |
+| **Siri Phrases** | "...in Pulsio" | App Shortcuts use display name |
+| **Test Target** | `PulseTests` | `@testable import Pulsio` (module is Pulsio) |
+| **TEST_HOST** | `Pulsio.app/Pulsio` | Must match actual product name |
+
+**Rule of thumb:** Internal/structural names stayed "Pulse". Anything user-facing or derived from the target name is "Pulsio". When writing tests, always use `@testable import Pulsio`.
 
 ---
 
