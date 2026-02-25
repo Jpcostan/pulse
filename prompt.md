@@ -209,6 +209,12 @@ Feature gating and purchase restoration work correctly.
 
 11) Polish & App Store Readiness
 
+Onboarding flow (first-launch walkthrough with Pro purchase on final slide)
+
+Free-mode UX indicator on RecordingView ("Free — 3 min limit")
+
+Siri Shortcuts debugging (Phase 8 code compiles but doesn't work on device)
+
 Permission explanations
 
 Error handling
@@ -223,6 +229,296 @@ App Review checklist
 
 Done when:
 The app is ready for App Store submission.
+
+12) Manual Testing
+
+Comprehensive manual test pass covering every user-facing flow and edge case.
+All scenarios documented below must be executed on a physical device.
+
+**12.1 — Recording Flow (Free Tier)**
+- Start recording → verify timer runs and audio level indicator animates
+- Hit 3-minute mark → verify auto-stop, paywall appears, recording saved
+- Dismiss paywall without purchasing → verify 3-min recording proceeds to processing
+- Purchase from paywall → verify Pro status updates immediately, sheet dismisses
+
+**12.2 — Recording Flow (Pro Tier)**
+- Start recording → record past 3 minutes → verify no cutoff
+- Reach 45-minute mark → verify warning alert appears
+- Reach 60-minute mark → verify auto-stop with graceful save
+- Cancel recording → verify meeting deleted and audio file cleaned up
+
+**12.3 — Background Recording & Live Activity**
+- Start recording → lock device → verify recording continues in background
+- Start recording → switch to another app → verify recording continues
+- Verify Live Activity timer updates on lock screen while device locked
+- Tap Live Activity → verify deep link returns to RecordingView
+- End recording while in background → verify Live Activity dismissed
+
+**12.4 — Transcription Pipeline**
+- Short recording (< 30s) → verify single-chunk transcription
+- Long recording (> 30s) → verify multi-chunk transcription with correct ordering
+- Verify chunk overlap (2s) doesn't create duplicate words at boundaries
+- Chunk retry on failure → verify resilience
+- On-device model not downloaded → verify user-friendly error message guiding to Settings
+- Empty/silent recording → verify graceful handling (no crash, empty transcript)
+
+**12.5 — Action Detection**
+- Recording with clear action items ("I need to send the report by Friday") → verify detection
+- Recording with no action items (just conversation) → verify empty state in ActionReviewView
+- False positive resistance: read a poem or tell a story → verify no spurious detections
+- Negation filtering ("don't call him") → verify filtered out
+- Question filtering ("Should we do X?") → verify filtered; "Can you send the report?" → verify detected
+- Generic patterns with task context ("I'll schedule the meeting") → verify detected
+- Generic patterns without task context ("I'll be fine") → verify filtered
+- Multiple action items in one recording → verify all detected and sorted by confidence
+
+**12.6 — Action Review & Editing**
+- Manual action creation via "+" button → verify new item appears, title editable and focused
+- Edit action item title inline → verify saved to Core Data
+- Date picker: set due date → verify saved; remove date → verify removed
+- Toggle include/exclude → verify persists across view transitions
+- Expand source sentence → verify correct sentence shown with animation
+- Confidence-sorted display → verify highest first
+- Empty state → verify "No Action Items Detected" message
+
+**12.7 — Reminders & Calendar (EventKit)**
+- Create reminders from included action items → verify appear in Apple Reminders app
+- Create calendar events for items with due dates → verify appear in Calendar app
+- Sync status badges ("Synced to Reminders" / "In Calendar") → verify shown after creation
+- Deny Reminders permission → verify graceful handling and clear error message
+- Deny Calendar permission → verify graceful handling
+- Items without due dates → verify no calendar event created
+- Items excluded (toggled off) → verify not synced
+
+**12.8 — Monetization / StoreKit**
+- Purchase flow (StoreKit sandbox) → verify isPro updates, paywall dismisses
+- Restore purchases → verify entitlement restored and UI updates
+- Kill and relaunch app → verify Pro status persists across launches
+- Product loading failure (no network in sandbox) → verify error message shown
+- User cancels purchase → verify no state change, paywall remains
+- Settings view: Free user → shows "Free" + "Upgrade to Pro"; Pro user → shows "Pro — Lifetime"
+
+**12.9 — Onboarding (Phase 11 feature)**
+- First launch → verify onboarding appears automatically
+- Walk through all slides → verify content and flow
+- Purchase from final slide → verify Pro status activates
+- Skip/dismiss onboarding → verify app works in free mode
+- Second launch → verify onboarding does NOT appear again
+
+**12.10 — Settings**
+- Free user: shows "Free" status badge and "Upgrade to Pro" button
+- Pro user: shows "Pro — Lifetime" confirmation, no upgrade button
+- Restore purchases button → verify works
+- Live Activity section → verify instructional text present
+- App version and build number → verify correct values from Bundle
+
+**12.11 — Navigation & Flow**
+- Full happy path: Home → Recording → Processing → Action Review → Summary → Home
+- Cancel recording mid-flow → verify returns to Home, meeting deleted from Core Data
+- View past meeting via MeetingDetailView → verify transcript, actions, audio player
+- Delete meeting from Home list (swipe to delete) → verify removed from Core Data and list
+- Deep link pulse://recording → verify navigates to active recording
+- Pop-to-root after Summary → verify clean navigation state (no stale views)
+
+**12.12 — Audio Playback (MeetingDetailView)**
+- Play/pause recorded audio → verify controls work
+- Skip forward/backward (15s) → verify seek positions update
+- Slider seek → verify playback jumps to correct position
+- Audio file exists → verify playback works end-to-end
+- Audio file deleted (user chose cleanup in Summary) → verify graceful handling (no crash, section hidden)
+
+**12.13 — Transcript Editing (MeetingDetailView)**
+- "Edit" button in transcript section → verify TextEditor fields appear per chunk
+- Modify text in a chunk → click "Done" → verify saved to Core Data
+- Navigate away and return → verify edits persisted
+- Multiple chunks → verify correct order maintained after edit
+
+**12.14 — Data Persistence & Core Data**
+- Kill app during processing → verify partial data saved (transcript chunks so far)
+- Kill app after completion → verify meeting, transcript, actions all intact
+- Core Data relationships: Meeting → TranscriptChunks, Meeting → ActionItems → verify integrity
+- TranscriptChunks ordered by order field → verify correct sequence
+- ActionItem identifiers (reminder/calendar) → verify stored and retrievable after sync
+
+**12.15 — Edge Cases & Error Handling**
+- No microphone permission → verify clear error message directing to Settings
+- No speech recognition permission → verify clear error message directing to Settings
+- Low battery (< 20%) at recording start → verify warning shown with "Record Anyway" option
+- Low storage (< 500MB) at recording start → verify warning shown with "Record Anyway" option
+- Audio interruption (incoming phone call during recording) → verify pause/resume or graceful stop
+- Route change (headphones unplugged) → verify recording continues with built-in mic
+- Very short recording (< 5 seconds) → verify transcription handles gracefully
+- Very long meeting title (50+ characters) → verify UI doesn't break or truncate poorly
+- Rapid start/stop recording (tap stop immediately after start) → verify no crash or stale state
+- Record with no speech (silence only) → verify empty transcript, no crash
+
+**12.16 — Siri Shortcuts (if fixed in Phase 11)**
+- "Start a meeting in Pulsio" → verify meeting created and RecordingView appears
+- "Stop meeting in Pulsio" → verify recording stops and meeting saved
+- Start with custom title parameter → verify title applied
+- Shortcuts appear in Shortcuts app → verify listed
+- No active recording + "Stop meeting" → verify graceful error dialog
+
+**12.17 — Performance & Stability**
+- Memory usage during 10+ minute recording → verify no memory leaks (Instruments)
+- CPU usage during transcription of long recording → verify reasonable
+- App launch time → verify under 2 seconds (cold start)
+- UI responsiveness during processing → verify spinner animates, no freezes
+- Multiple meetings in list (10+) → verify scroll performance
+- Rapid navigation between screens → verify no crashes
+
+**12.18 — App Store Readiness Checks**
+- All permission strings present in Info.plist and worded clearly
+- Privacy nutrition labels accurate (microphone, speech recognition, no data collection)
+- No crashes on cold launch
+- No crashes on any supported device size (iPhone SE, standard, Pro Max)
+- App icon renders correctly at all sizes
+- Launch screen displays properly
+
+Done when:
+All manual test scenarios pass on a physical device with no crashes or unexpected behavior.
+
+13) Unit Testing (XCTest — Target 70%+ Code Coverage)
+
+Write XCTest unit tests in the PulseTests target covering service logic, data models,
+and view model behavior. Use in-memory Core Data contexts for isolation. Target 70%+
+line coverage across testable code.
+
+**13.1 — ActionDetectionService Tests** (highest priority — 773 LOC)
+- Test sentence segmentation: single sentence, multiple sentences, empty string
+- Test each action pattern category: commitment phrases ("I'll send", "we should review"), request phrases ("can you", "please send"), task markers ("TODO:", "action item:"), deadline phrases ("due by Friday", "due tomorrow")
+- Test two-tier pattern system: generic pattern WITH task context → detected; generic pattern WITHOUT task context → skipped
+- Test hasTaskIndicators(): sentences with task verbs, task nouns, time indicators, digit+am/pm patterns
+- Test negation filtering: "don't call him" → filtered; "don't forget to send" → NOT filtered (exception)
+- Test question filtering: "Should we go?" → filtered; "Can you send the report?" → detected (request pattern)
+- Test false positive guards: sentence < 3 words → filtered; sentence > 200 chars → filtered
+- Test stop-word title filter: extracted title "see" → filtered; extracted title "call" → allowed
+- Test confidence scoring: specific patterns score higher than generic patterns
+- Test deduplication: duplicate sentences produce single action item
+- Test date extraction: "by Friday" → next Friday date, "in 3 days" → correct date, "ASAP" → tomorrow, "end of month" → last day, "by 3pm" → correct time component
+- Test spelled-out number conversion: "at nine" → "at 9", "noon" → "12", "midnight" → "12 AM"
+- Test empty input: empty string → 0 actions, whitespace only → 0 actions
+- Test Core Data integration: ActionItem entities created with correct fields (title, sourceSentence, confidence, dueDate, isIncluded)
+
+**13.2 — TranscriptionService Tests**
+- Test chunk calculation: 15s audio → 1 chunk, 45s audio → 2 chunks, 90s audio → 3 chunks
+- Test chunk overlap: 30s chunk with 2s overlap → 28s stride
+- Test progressive saving: verify TranscriptChunk entities saved per chunk
+- Test chunk ordering: chunks saved with correct order field (0, 1, 2...)
+- Test error handling: all chunks fail → throws allChunksFailed with message
+- Test cancellation: cancel() sets flag, in-progress transcription stops
+- Test permission request: authorization status mapping
+- Test transcript text assembly: chunks joined with ". " separator
+
+**13.3 — AudioRecordingService Tests**
+- Test pre-recording validation: battery < 20% → returns error, storage < 500MB → returns error, both OK → returns nil
+- Test free tier limit: StoreService.isPro = false → limit at 180 seconds; isPro = true → no limit
+- Test formatted remaining time: 300s → "5:00", 65s → "1:05", 0s → "0:00"
+- Test audio file URL generation: correct Documents/Recordings/{meetingID}.m4a path
+- Test audio file existence check: file exists → true, file missing → false
+- Test audio file deletion: file removed from disk, throws if file doesn't exist
+- Test state reset: after stopRecording(), isRecording = false, currentTime = 0
+- Test dismiss duration warning: showDurationWarning set to false
+
+**13.4 — RemindersService Tests** (using mock EKEventStore where possible)
+- Test authorization status updates: reflects EKEventStore auth status
+- Test hasRemindersAccess computed property: authorized → true, denied → false, notDetermined → false
+- Test hasCalendarAccess computed property: authorized → true, denied → false
+- Test createReminders: creates correct number of reminders from included ActionItems
+- Test createReminders skips excluded items: isIncluded = false → not synced
+- Test createCalendarEvents: only creates events for items with due dates
+- Test reminder identifier storage: reminderIdentifier saved to ActionItem after creation
+- Test calendar event identifier storage: calendarEventIdentifier saved to ActionItem
+
+**13.5 — AudioPlaybackService Tests**
+- Test load: valid URL → duration > 0, isPlaying = false
+- Test load: invalid URL → throws PlaybackError
+- Test play/pause toggle: togglePlayPause flips isPlaying state
+- Test stop: resets currentTime to 0, isPlaying = false
+- Test seek: seek(to: 30) → currentTime = 30
+- Test skip: skip(by: 15) → currentTime += 15; skip(by: -15) → currentTime -= 15
+- Test skip bounds: skip past duration → clamped to duration; skip before 0 → clamped to 0
+- Test cleanup: after cleanup, isPlaying = false, duration = 0
+
+**13.6 — StoreService Tests** (using StoreKit Testing)
+- Test initial state: isPro = false, product = nil
+- Test loadProducts: products loaded from Configuration.storekit
+- Test purchase flow: after purchase, isPro = true
+- Test restore purchases: entitled transaction → isPro = true
+- Test entitlement persistence: updateEntitlements reflects current state
+- Test no entitlements: isPro remains false
+
+**13.7 — Core Data Model Tests**
+- Test Meeting creation: all fields populated correctly (id, title, createdAt, status)
+- Test Meeting relationships: transcriptChunks and actionItems populated and accessible
+- Test TranscriptChunk creation: id, text, startTime, endTime, order, meeting relationship
+- Test TranscriptChunk ordering: fetched results sorted by order field
+- Test ActionItem creation: id, title, sourceSentence, dueDate, isIncluded, confidence
+- Test ActionItem defaults: isIncluded defaults based on confidence threshold
+- Test cascade delete: deleting Meeting removes associated TranscriptChunks and ActionItems
+- Test context save/fetch round-trip: save entities, re-fetch, verify all fields intact
+
+**13.8 — Persistence Controller Tests**
+- Test shared container loads: viewContext is not nil
+- Test in-memory preview container: preview data contains 3 sample meetings
+- Test merge policy: NSMergeByPropertyObjectTrumpMergePolicy is set
+- Test automaticallyMergesChangesFromParent: enabled
+
+**13.9 — RecordingActivityAttributes Tests**
+- Test Codable conformance: encode → decode round-trip preserves all fields
+- Test ContentState: elapsedSeconds and isRecording serialize correctly
+- Test Hashable: equal attributes produce same hash
+
+**13.10 — Intent Tests**
+- Test StartMeetingIntent: sets MeetingIntentState.pendingMeetingTitle
+- Test StartMeetingIntent default title: nil parameter → "Meeting"
+- Test StopMeetingIntent: returns error dialog when no active recording
+- Test MeetingIntentState: singleton pattern, pendingMeetingTitle observable
+
+**13.11 — Date Parsing Tests (ActionDetectionService)**
+- Test "by Friday" → next occurrence of Friday
+- Test "next Monday" → next Monday from today
+- Test "tomorrow" → today + 1 day
+- Test "in 3 days" → today + 3 days
+- Test "in 2 weeks" → today + 14 days
+- Test "end of month" → last day of current month
+- Test "ASAP" → tomorrow
+- Test "by 3pm" → today at 15:00 (or tomorrow if past 3pm)
+- Test "before noon" → today at 12:00
+- Test "eod" / "end of day" → today at 17:00
+- Test "on Monday" → next Monday with correct date
+- Test no date in sentence → nil dueDate
+- Test NSDataDetector dates: "March 15" → correct date object
+
+**13.12 — Navigation & State Tests**
+- Test HomeView meeting creation: new Meeting entity with auto-incremented title
+- Test deep link URL parsing: "pulse://recording" → valid, "pulse://other" → ignored
+- Test ProcessingView phase transitions: transcribing → detectingActions → complete
+- Test ProcessingView progress calculation: transcription at 50% → overall 35%; action detection at 50% → overall 85%
+
+Done when:
+Unit tests achieve 70%+ line coverage on services and models. All tests pass in CI (xcodebuild test).
+
+14) App Store Submission
+
+Final submission to App Store Connect after all testing passes.
+
+Done when:
+App approved and live on the App Store.
+
+15) Codebase Analysis
+
+Analyze the entire codebase for anything unnecessary that should be removed before deploying to the App Store:
+- Dead code (unused functions, variables, types)
+- Debug/development artifacts (print statements, NSLog calls, debug views, test data)
+- Unused imports and files
+- Commented-out code blocks
+- Placeholder or TODO items that should be resolved
+- Unused assets or resources
+- Any development-only features that shouldn't ship to production
+
+Done when:
+Codebase is clean and production-ready with no dead code or debug artifacts.
 
 Constraints (Must Follow)
 
@@ -578,3 +874,83 @@ MUST test on physical iPhone (Live Activities don't work in simulator):
 
 ### To Resume
 > "Read CLAUDE.md for project context. Phases 0-10 are complete and tested. Phase 8 (Siri) code is written but not working on device. Ready for Phase 11 (Polish & App Store Readiness), then Phase 12 (End-to-End Testing)."
+
+2/23/26
+## Session Summary
+
+### First TestFlight Build Uploaded — Version 1.0 (3) ✅
+
+**Pre-Upload Fixes:**
+- Copied main app icon to widget extension `AppIcon.appiconset` (was empty/placeholder)
+- Bumped `CURRENT_PROJECT_VERSION` from 2 → 3 (synced main app + widget extension)
+- Updated all 4 permission strings from "Pulse" → "Pulsio" to match `CFBundleDisplayName` (avoids App Review flags)
+- Build verified clean ✅
+
+**TestFlight Upload:**
+- Archived via Xcode (Product → Archive)
+- Distributed via "App Store Connect" method
+- Export Compliance: No encryption — answered "No"
+- Build processed successfully, status: "Ready to Submit"
+- Added internal testing group, accepted TestFlight invite, installed on device ✅
+
+**App Store Connect Setup (Partial — enough for TestFlight):**
+- App name: "Pulsio" (because "Pulse" was taken — no technical issues from this)
+- Subtitle: "Turn Meetings Into Actions"
+- Bundle ID confirmed: `com.jpcostan.Pulse`
+- Category: Productivity
+- Pricing: Free (monetized via IAP)
+- App Privacy: No data collected (all on-device processing)
+- Age Rating: All Ages / 4+
+- Content Rights, Parental Controls, Web Access, UGC, Messaging, Advertising: all N/A or No
+
+**Still TODO in App Store Connect (before App Store submission):**
+- Create IAP product `com.jpcostan.Pulse.pro.lifetime` ($5.99 non-consumable) — currently only exists in local `Configuration.storekit`
+- Fill out Distribution section (description, screenshots, keywords) — not needed for TestFlight
+- App icon shows in TestFlight but not in main ASC listing (normal — populates after attaching build to a version for review)
+
+### To Resume
+> "Read CLAUDE.md and prompt.md for project context. First TestFlight build (1.0 build 3) is uploaded and installable. Phases 0-10 complete. Ready for Phase 11 (Polish & App Store Readiness)."
+
+2/24/26
+## Session Summary
+
+### Phase 11 Code Polish — Complete
+
+**Onboarding Flow (OnboardingView.swift — NEW):**
+- 3-slide TabView with PageTabViewStyle: Welcome → How It Works → Get Started (Pro upgrade)
+- `@AppStorage("hasCompletedOnboarding")` persists first-launch state in UserDefaults
+- Presented as `.fullScreenCover` from PulseApp.swift — only shows on first launch
+- Slide 3: Purchase button (StoreService.shared), "Continue for free" skip — both dismiss and set flag
+
+**Free-Mode UX (RecordingView.swift):**
+- Orange capsule badge: clock icon + "Free — 3 min limit"
+- Hidden for Pro users (`!StoreService.shared.isPro`)
+
+**Permission Explanations (project.pbxproj):**
+- All 4 strings rewritten with privacy-reassuring language
+- Microphone: "Audio stays on your device and is never uploaded."
+- Speech Recognition: "...entirely on-device... No audio is sent to the cloud."
+- Reminders/Calendar: "...action items you choose to export. No data leaves your device."
+
+**Error Handling Pass (4 files, 7 fixes):**
+- RecordingView: 2 silent `print()` catch blocks → error alert with `error.localizedDescription`
+- HomeView: meeting create (2 places) and delete → "Failed to [create/delete] meeting" alerts
+- MeetingDetailView: audio load failure → "Failed to load the audio recording" alert
+- SummaryView: audio delete failure → "Failed to delete the audio file" alert
+
+**iOS 26 Deprecation Fix:**
+- `Text() + Text()` → string interpolation in PaywallView and OnboardingView
+
+**Phase 15 Added:**
+- Codebase Analysis phase — audit for dead code, debug artifacts, unused files before App Store deploy
+
+### Phase 11 Remaining (non-code / deferred)
+- Siri Shortcuts debugging (deferred)
+- Performance profiling (requires Instruments)
+- App Icon & Launch Screen (design assets needed)
+- App Store Copy & Screenshots (App Store Connect)
+- Privacy Disclosures (App Store Connect)
+- App Review Checklist
+
+### To Resume
+> "Read CLAUDE.md and prompt.md for project context. Phase 11 code polish is done. Remaining Phase 11 items are non-code (Siri debugging, performance profiling, App Store assets). Ready for Phase 12 (Manual Testing), Phase 13 (Unit Testing), Phase 14 (App Store Submission), Phase 15 (Codebase Analysis)."

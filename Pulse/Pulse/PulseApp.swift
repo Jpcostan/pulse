@@ -13,6 +13,9 @@ struct PulseApp: App {
     // Initialize StoreService singleton at app launch so entitlements are loaded early
     private let storeService = StoreService.shared
 
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var showOnboarding = false
+
     init() {
         NSLog("🚀 PULSE APP LAUNCHED 🚀")
         print("🚀 PULSE APP LAUNCHED (print) 🚀")
@@ -25,6 +28,17 @@ struct PulseApp: App {
         WindowGroup {
             HomeView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .onAppear {
+                    if !hasCompletedOnboarding {
+                        showOnboarding = true
+                    }
+                }
+                .fullScreenCover(isPresented: $showOnboarding) {
+                    OnboardingView(onComplete: {
+                        hasCompletedOnboarding = true
+                        showOnboarding = false
+                    })
+                }
         }
     }
 }

@@ -20,6 +20,7 @@ struct RecordingView: View {
     @State private var showDurationWarningAlert = false
     @State private var showAutoStopAlert = false
     @State private var showPaywall = false
+    @State private var errorMessage = ""
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -68,6 +69,21 @@ struct RecordingView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
+            // Free tier limit indicator
+            if !StoreService.shared.isPro {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                    Text("Free — 3 min limit")
+                        .font(.caption)
+                }
+                .foregroundStyle(.orange)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.orange.opacity(0.1))
+                .clipShape(Capsule())
+            }
+
             // Audio level indicator
             AudioLevelView(level: audioService.audioLevel)
                 .frame(height: 4)
@@ -112,7 +128,7 @@ struct RecordingView: View {
                 dismiss()
             }
         } message: {
-            Text(audioService.error?.localizedDescription ?? "An unknown error occurred")
+            Text(errorMessage.isEmpty ? (audioService.error?.localizedDescription ?? "An unknown error occurred.") : errorMessage)
         }
         .alert("Recording Time Warning", isPresented: $showDurationWarningAlert) {
             Button("Continue Recording") {
@@ -192,7 +208,8 @@ struct RecordingView: View {
             meeting.audioFilePath = fileURL.path
             try? meeting.managedObjectContext?.save()
         } catch {
-            print("Failed to start recording: \(error)")
+            errorMessage = error.localizedDescription
+            showError = true
         }
     }
 
@@ -210,7 +227,8 @@ struct RecordingView: View {
             meeting.audioFilePath = fileURL.path
             try? meeting.managedObjectContext?.save()
         } catch {
-            print("Failed to start recording: \(error)")
+            errorMessage = error.localizedDescription
+            showError = true
         }
     }
 

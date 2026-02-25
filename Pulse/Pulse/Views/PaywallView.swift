@@ -61,8 +61,7 @@ struct PaywallView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text(store.product?.displayPrice ?? "$5.99")
-                                + Text(" — Lifetime")
+                                Text("\(store.product?.displayPrice ?? "$5.99") — Lifetime")
                             }
                         }
                         .font(.headline)

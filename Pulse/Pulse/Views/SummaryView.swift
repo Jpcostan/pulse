@@ -15,6 +15,7 @@ struct SummaryView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var showDeleteAudioAlert = false
     @State private var audioDeleted = false
+    @State private var showDeleteError = false
 
     var body: some View {
         VStack(spacing: 32) {
@@ -130,6 +131,11 @@ struct SummaryView: View {
         } message: {
             Text("The transcript and action items will be kept. Only the audio recording will be deleted to free up storage space.")
         }
+        .alert("Delete Failed", isPresented: $showDeleteError) {
+            Button("OK") { }
+        } message: {
+            Text("Failed to delete the audio file. Please try again.")
+        }
     }
 
     private var formattedDuration: String {
@@ -169,7 +175,7 @@ struct SummaryView: View {
             try? viewContext.save()
             audioDeleted = true
         } catch {
-            print("Failed to delete audio: \(error)")
+            showDeleteError = true
         }
     }
 }

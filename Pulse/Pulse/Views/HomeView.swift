@@ -16,6 +16,8 @@ struct HomeView: View {
     private var meetings: FetchedResults<Meeting>
 
     @State private var navigationPath = NavigationPath()
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     private var intentState = MeetingIntentState.shared
 
     var body: some View {
@@ -57,6 +59,11 @@ struct HomeView: View {
                     startMeetingFromIntent(title: title)
                     intentState.pendingMeetingTitle = nil
                 }
+            }
+            .alert("Error", isPresented: $showErrorAlert) {
+                Button("OK") { }
+            } message: {
+                Text(errorMessage)
             }
         }
     }
@@ -117,8 +124,8 @@ struct HomeView: View {
             try viewContext.save()
             navigationPath.append(newMeeting)
         } catch {
-            let nsError = error as NSError
-            print("Error creating meeting: \(nsError), \(nsError.userInfo)")
+            errorMessage = "Failed to create meeting. Please try again."
+            showErrorAlert = true
         }
     }
 
@@ -141,7 +148,8 @@ struct HomeView: View {
             navigationPath = NavigationPath()
             navigationPath.append(newMeeting)
         } catch {
-            print("Error creating meeting from intent: \(error)")
+            errorMessage = "Failed to create meeting. Please try again."
+            showErrorAlert = true
         }
     }
 
@@ -155,8 +163,8 @@ struct HomeView: View {
             do {
                 try viewContext.save()
             } catch {
-                let nsError = error as NSError
-                print("Error deleting meeting: \(nsError), \(nsError.userInfo)")
+                errorMessage = "Failed to delete meeting. Please try again."
+                showErrorAlert = true
             }
         }
     }

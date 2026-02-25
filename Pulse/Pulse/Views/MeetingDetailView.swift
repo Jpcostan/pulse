@@ -13,6 +13,7 @@ struct MeetingDetailView: View {
     @State private var hasLoadedAudio = false
     @State private var isEditingTranscript = false
     @State private var editedChunks: [UUID: String] = [:]
+    @State private var showAudioError = false
 
     var body: some View {
         List {
@@ -124,6 +125,11 @@ struct MeetingDetailView: View {
         .onDisappear {
             playbackService.cleanup()
         }
+        .alert("Playback Error", isPresented: $showAudioError) {
+            Button("OK") { }
+        } message: {
+            Text("Failed to load the audio recording. The file may be missing or corrupted.")
+        }
     }
 
     private func saveTranscriptEdits() {
@@ -156,7 +162,7 @@ struct MeetingDetailView: View {
         do {
             try playbackService.load(path: audioPath)
         } catch {
-            print("Failed to load audio: \(error)")
+            showAudioError = true
         }
     }
 }
