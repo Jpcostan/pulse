@@ -6,6 +6,7 @@
 import SwiftUI
 import CoreData
 import AppIntents
+import ActivityKit
 
 @main
 struct PulseApp: App {
@@ -19,6 +20,26 @@ struct PulseApp: App {
     init() {
         // Register App Shortcuts with Siri
         PulseShortcuts.updateAppShortcutParameters()
+
+        // Clean up any stale Live Activities left over from a force-kill
+        cleanUpStaleLiveActivities()
+    }
+
+    private func cleanUpStaleLiveActivities() {
+        for activity in Activity<RecordingActivityAttributes>.activities {
+            Task {
+                await activity.end(
+                    .init(
+                        state: RecordingActivityAttributes.ContentState(
+                            elapsedSeconds: 0,
+                            isRecording: false
+                        ),
+                        staleDate: nil
+                    ),
+                    dismissalPolicy: .immediate
+                )
+            }
+        }
     }
 
     var body: some Scene {

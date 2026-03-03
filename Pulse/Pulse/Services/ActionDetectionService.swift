@@ -24,19 +24,21 @@ final class ActionDetectionService: ObservableObject {
     /// or time reference to be considered an action. This prevents poems/narrative from matching.
     private let actionPatterns: [(pattern: String, confidence: Double, requiresTaskContext: Bool)] = [
         // First person commitments — generic, need task context
+        // "also" is optional to handle "I also need to", "I also have to", etc.
         ("i('ll| will) ", 0.90, true),
-        ("i need to ", 0.92, true),
-        ("i have to ", 0.90, true),
+        ("i (also )?need to ", 0.92, true),
+        ("i (also )?have to ", 0.90, true),
         ("i'm going to ", 0.88, true),
         ("i am going to ", 0.88, true),
-        ("i should ", 0.85, true),
-        ("i must ", 0.90, true),
+        ("i (also )?should ", 0.85, true),
+        ("i (also )?must ", 0.90, true),
 
         // We/team commitments — generic, need task context
+        // "also" is optional to handle "we also need to", "we also have to", etc.
         ("we('ll| will) ", 0.88, true),
-        ("we need to ", 0.90, true),
-        ("we have to ", 0.88, true),
-        ("we should ", 0.85, true),
+        ("we (also )?need to ", 0.90, true),
+        ("we (also )?have to ", 0.88, true),
+        ("we (also )?should ", 0.85, true),
         ("we're going to ", 0.86, true),
         ("we are going to ", 0.86, true),
         ("let's ", 0.82, true),
@@ -63,8 +65,9 @@ final class ActionDetectionService: ObservableObject {
         ("be sure ", 0.84, false),
 
         // Meeting/appointment mentions — specific
-        ("meeting (on |at |this |next |)", 0.75, false),
-        ("appointment (on |at |this |next |)", 0.75, false),
+        // NOTE: No empty alternative — "meeting we went well" must NOT match
+        ("meeting (on |at |this |next |with |for )", 0.75, false),
+        ("appointment (on |at |this |next |with |for )", 0.75, false),
         ("call (on |at |this |next |with )", 0.75, false),
 
         // Action verbs at start (imperative mood) — specific
@@ -121,6 +124,13 @@ final class ActionDetectionService: ObservableObject {
         ("has to be ", 0.85, true),
         ("must be ", 0.88, true),
         ("should be ", 0.80, true),
+
+        // Third-person assignments — "[Name/subject] needs to/should/will/has to"
+        // Generic: require task context to avoid "it needs to be warm", "she should be fine"
+        ("\\w+ needs to ", 0.85, true),
+        ("\\w+ should ", 0.80, true),
+        ("\\w+ has to ", 0.85, true),
+        ("\\w+ must ", 0.85, true),
 
         // "I have a [task noun]" — specific (task noun is in the pattern itself)
         ("i have (a |an |)(meeting|appointment|deadline|assignment|homework|exam|test|interview|presentation) ", 0.80, false),
@@ -267,7 +277,7 @@ final class ActionDetectionService: ObservableObject {
 
     // MARK: - Private Methods
 
-    /// Segment text into sentences using NLTokenizer
+    /// Segment text into sentences using NLTokenizer, then split compound sentences
     private func segmentSentences(from text: String) -> [String] {
         let tokenizer = NLTokenizer(unit: .sentence)
         tokenizer.string = text
@@ -281,7 +291,92 @@ final class ActionDetectionService: ObservableObject {
             return true
         }
 
-        return sentences
+        // Speech recognition often omits punctuation, producing long run-on sentences.
+        // Split compound sentences at conjunction + subject + action verb boundaries.
+        return sentences.flatMap { splitCompoundSentence($0) }
+    }
+
+    /// Split a long sentence at natural action boundaries where a new subject begins.
+    /// e.g. "Josh needs to send the report by Friday we also need to schedule a meeting"
+    /// → ["Josh needs to send the report by Friday", "we also need to schedule a meeting"]
+    private func splitCompoundSentence(_ sentence: String) -> [String] {
+        // Only attempt splitting on sentences long enough to contain multiple actions
+        guard sentence.count > 80 else { return [sentence] }
+
+        // Patterns that mark the start of a new action clause.
+        // We split BEFORE these patterns so each fragment starts with its own subject.
+        let splitPatterns = [
+            // "we also need/have/should/must/will"
+            #"(?:and |, )?\bwe also (?:need to|have to|should|must|will) "#,
+            // "we need to / we should / we'll" (without "also")
+            #"(?:and |, )?\bwe (?:need to|have to|should|must|will|'ll) "#,
+            // "also [subject] should/needs/will"
+            #"(?:and |, )?\balso \b[A-Z][a-z]+ (?:should|needs? to|will|must|has to|have to) "#,
+            // "and [Name] should/needs/will" (capitalized name = new subject)
+            #"(?:and |, )\b[A-Z][a-z]+ (?:should|needs? to|will|must|has to|have to) "#,
+            // "and [pronoun] should/needs/will"
+            #"(?:and |, )\b(?:i|you|he|she|they) (?:should|need to|needs? to|will|must|have to|has to|'ll) "#,
+            // "[Name] needs/should/will" after a space (new subject without conjunction, for run-on speech)
+            #" \b[A-Z][a-z]+ (?:should|needs? to|will|must|has to|have to) "#,
+            // "[pronoun] need/should" mid-sentence for run-on speech (e.g. "...by Friday we need to...")
+            #" \b(?:we|you|i|they) (?:need to|have to|should|must) "#,
+        ]
+
+        var fragments: [String] = []
+        var remaining = sentence
+
+        // Iteratively find the earliest split point and break there
+        while remaining.count > 40 {
+            var earliestRange: Range<String.Index>?
+            var earliestPattern = ""
+
+            for pattern in splitPatterns {
+                guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { continue }
+                let nsRange = NSRange(remaining.startIndex..<remaining.endIndex, in: remaining)
+
+                // Search starting after the first 20 characters to avoid splitting at the very beginning
+                let searchStart = remaining.index(remaining.startIndex, offsetBy: min(20, remaining.count))
+                let searchNSRange = NSRange(searchStart..<remaining.endIndex, in: remaining)
+
+                if let match = regex.firstMatch(in: remaining, options: [], range: searchNSRange),
+                   let matchRange = Range(match.range, in: remaining) {
+                    if earliestRange == nil || matchRange.lowerBound < earliestRange!.lowerBound {
+                        earliestRange = matchRange
+                        earliestPattern = pattern
+                    }
+                }
+            }
+
+            guard let splitRange = earliestRange else { break }
+
+            // Take everything before the split point as a fragment
+            let before = String(remaining[remaining.startIndex..<splitRange.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !before.isEmpty && before.split(separator: " ").count >= 3 {
+                fragments.append(before)
+            }
+
+            // The matched text becomes the start of the next segment.
+            // Strip leading "and " or ", " so the fragment reads naturally.
+            var after = String(remaining[splitRange.lowerBound...])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if after.lowercased().hasPrefix("and ") {
+                after = String(after.dropFirst(4))
+            } else if after.hasPrefix(", ") {
+                after = String(after.dropFirst(2))
+            }
+
+            remaining = after
+            _ = earliestPattern // suppress unused warning
+        }
+
+        // Add whatever is left
+        let trimmed = remaining.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty && trimmed.split(separator: " ").count >= 3 {
+            fragments.append(trimmed)
+        }
+
+        return fragments.isEmpty ? [sentence] : fragments
     }
 
     /// Common stop words that aren't valid standalone action titles
@@ -405,9 +500,10 @@ final class ActionDetectionService: ObservableObject {
         return false
     }
 
-    /// Check if a sentence is negated (e.g., "don't send that email")
+    /// Check if a sentence is negated (e.g., "don't send that email", "I'm not going to schedule that")
     /// Exception: "don't forget" is still an action
     private func isNegated(_ lowercased: String) -> Bool {
+        // Check "don't/do not" at start of sentence
         let negationPrefixes = ["don't ", "dont ", "do not "]
         for prefix in negationPrefixes {
             if lowercased.hasPrefix(prefix) {
@@ -419,6 +515,24 @@ final class ActionDetectionService: ObservableObject {
                 return true
             }
         }
+
+        // Check for negation phrases anywhere in the sentence
+        let negationPhrases = [
+            "not going to ", "not gonna ",
+            "won't ", "will not ",
+            "wouldn't ", "would not ",
+            "shouldn't ", "should not ",
+            "can't ", "cannot ", "can not ",
+            "decided not to ", "chose not to ",
+            "no longer ", "no need to ",
+            "isn't going to ", "aren't going to ",
+        ]
+        for phrase in negationPhrases {
+            if lowercased.contains(phrase) {
+                return true
+            }
+        }
+
         return false
     }
 

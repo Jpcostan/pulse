@@ -82,6 +82,12 @@ struct ProcessingView: View {
                 showReview = true
             }
             Button("Cancel", role: .cancel) {
+                // Clean up audio file and delete the meeting since there's no useful data
+                if let meetingID = meeting.id {
+                    try? AudioRecordingService.shared.deleteAudioFile(for: meetingID)
+                }
+                viewContext.delete(meeting)
+                try? viewContext.save()
                 onComplete()
             }
         } message: {

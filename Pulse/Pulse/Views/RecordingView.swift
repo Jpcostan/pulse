@@ -154,7 +154,7 @@ struct RecordingView: View {
             if stopped { showAutoStopAlert = true }
         }
         .onReceive(audioService.$didHitFreeLimit) { hit in
-            if hit { showPaywall = true }
+            if hit && hasStartedRecording { showPaywall = true }
         }
         .sheet(isPresented: $showPaywall, onDismiss: {
             // Recording already stopped and saved — proceed to processing

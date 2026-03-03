@@ -66,7 +66,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Recording Widget")
                         .font(.headline)
-                    Text("To see the recording timer on your Lock Screen, add the Pulse Live Activity widget. Long-press your Lock Screen, tap Customize, and add the Pulse widget.")
+                    Text("To see the recording timer on your Lock Screen, add the Pulsio Live Activity widget. Long-press your Lock Screen, tap Customize, and add the Pulsio widget.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

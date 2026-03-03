@@ -63,6 +63,14 @@ struct ActionReviewView: View {
                             viewContext: viewContext,
                             isFocused: item == actionItems.last && newItemFocused
                         )
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                viewContext.delete(item)
+                                try? viewContext.save()
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
 
 }
@@ -350,6 +358,11 @@ struct ActionItemRow: View {
         .onChange(of: item.title) { _, newValue in
             if editedTitle != newValue {
                 editedTitle = newValue ?? ""
+            }
+        }
+        .onChange(of: titleFocused) { _, focused in
+            if !focused {
+                saveTitle()
             }
         }
         .sheet(isPresented: $showDatePicker) {

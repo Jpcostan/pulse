@@ -214,17 +214,30 @@ final class TranscriptionService: ObservableObject {
             currentStep = "Transcribing chunk \(chunkIndex + 1)/\(chunkCount)..."
             Log.transcription.info("Processing chunk \(chunkIndex + 1): \(startTime, format: .fixed(precision: 2))s - \(endTime, format: .fixed(precision: 2))s")
 
-            // Export this chunk to a temporary file
-            let chunkURL = try await exportAudioChunk(
-                from: audioURL,
-                startTime: startTime,
-                endTime: endTime,
-                chunkIndex: chunkIndex
-            )
+            // For single-chunk recordings, use the original file directly to avoid
+            // AVAssetExportSession re-encoding which can clip the first ~1-2 seconds
+            // due to AAC encoder delay and keyframe alignment at CMTime 0.
+            let chunkURL: URL
+            let shouldCleanupChunk: Bool
+            if chunkCount == 1 {
+                chunkURL = audioURL
+                shouldCleanupChunk = false
+                Log.transcription.info("Single-chunk recording — using original file directly (skipping export)")
+            } else {
+                chunkURL = try await exportAudioChunk(
+                    from: audioURL,
+                    startTime: startTime,
+                    endTime: endTime,
+                    chunkIndex: chunkIndex
+                )
+                shouldCleanupChunk = true
+            }
 
             defer {
-                // Clean up temp file
-                try? FileManager.default.removeItem(at: chunkURL)
+                // Clean up temp file (only if we created one)
+                if shouldCleanupChunk {
+                    try? FileManager.default.removeItem(at: chunkURL)
+                }
             }
 
             // Transcribe this chunk with retry

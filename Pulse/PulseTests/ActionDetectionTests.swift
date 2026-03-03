@@ -784,4 +784,213 @@ struct ActionDetectionTests {
         #expect(items.first?.isIncluded == true)
         #expect(items.first?.confidence ?? 0 >= 0.75)
     }
+
+    // MARK: - Meeting/Appointment Pattern False Positives
+
+    @Test @MainActor
+    func filtersMeetingMentionWithoutPreposition() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        // "that meeting went well" should NOT be detected — no preposition after "meeting"
+        let count = try await service.detectActions(
+            from: "All right so that meeting we went pretty well.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    @Test @MainActor
+    func filtersCasualMeetingReference() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        // Past-tense meeting reference should not be an action item
+        let count = try await service.detectActions(
+            from: "The meeting was really productive and everyone seemed happy.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    @Test @MainActor
+    func detectsMeetingWithPreposition() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        // "meeting with" should still be detected
+        let count = try await service.detectActions(
+            from: "I have a meeting with the design team on Friday.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    @Test @MainActor
+    func detectsMeetingForPreposition() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        // "meeting for" should still be detected
+        let count = try await service.detectActions(
+            from: "There is a meeting for the budget review next week.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    // MARK: - First-Person "Also" Patterns
+
+    @Test @MainActor
+    func detectsIAlsoNeedTo() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "I also need to send the report by Friday.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    @Test @MainActor
+    func detectsIAlsoShouldWithTaskContext() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "I also should review the budget before tomorrow.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    @Test @MainActor
+    func detectsWeAlsoNeedTo() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "We also need to finalize the project plan by Thursday.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    // MARK: - Mid-Sentence Negation Filtering
+
+    @Test @MainActor
+    func filtersNotGoingToMidSentence() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "I'm not going to schedule that meeting anymore.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    @Test @MainActor
+    func filtersWontNegation() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "I won't send the report until we get approval.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    @Test @MainActor
+    func filtersShouldntNegation() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "We shouldn't bother scheduling a follow-up meeting.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    @Test @MainActor
+    func filtersDecidedNotTo() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "We decided not to send the proposal this quarter.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
+
+    // MARK: - Third-Person Assignment Patterns
+
+    @Test @MainActor
+    func detectsThirdPersonNeedsTo() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "Josh needs to send the report by Friday.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    @Test @MainActor
+    func detectsThirdPersonShould() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        let count = try await service.detectActions(
+            from: "Sarah should update the spreadsheet before Thursday.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 1)
+    }
+
+    @Test @MainActor
+    func filtersThirdPersonShouldWithoutTaskContext() async throws {
+        let context = makeInMemoryContext()
+        let meeting = makeMeeting(in: context)
+        let service = ActionDetectionService()
+
+        // "Kevin should be fine" — no task context
+        let count = try await service.detectActions(
+            from: "Kevin should be fine with the new arrangement.",
+            meeting: meeting,
+            context: context
+        )
+        #expect(count == 0)
+    }
 }

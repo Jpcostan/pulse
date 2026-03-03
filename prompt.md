@@ -508,16 +508,14 @@ Final submission to App Store Connect after all testing passes.
 Done when:
 App approved and live on the App Store.
 
-15) Codebase Analysis
+15) Codebase Analysis & Naming Audit ✅ COMPLETE
 
-Analyze the entire codebase for anything unnecessary that should be removed before deploying to the App Store:
-- Dead code (unused functions, variables, types)
-- Debug/development artifacts (print statements, NSLog calls, debug views, test data)
-- Unused imports and files
-- Commented-out code blocks
-- Placeholder or TODO items that should be resolved
-- Unused assets or resources
-- Any development-only features that shouldn't ship to production
+Cleaned codebase for production readiness:
+- Removed all debug NSLog/print statements and debug UI sections
+- Migrated remaining NSLog calls to LoggingService (os.Logger)
+- Deleted 3 unused widget template files
+- Audited and fixed all user-facing "Pulse" → "Pulsio" naming issues
+- Created MANUALTESTING.md with 104 test cases for Phase 12
 
 Done when:
 Codebase is clean and production-ready with no dead code or debug artifacts.
@@ -956,3 +954,125 @@ MUST test on physical iPhone (Live Activities don't work in simulator):
 
 ### To Resume
 > "Read CLAUDE.md and prompt.md for project context. Phases 0-11 and 13 complete. 121 unit tests passing with CI pipeline on GitHub Actions. Ready for Phase 12 (Manual Testing), Phase 14 (App Store Submission), or Phase 15 (Codebase Analysis + 15.1 Naming Audit)."
+
+2/26/26
+## Session Summary
+
+### Phase 12 Manual Testing — In Progress (Build 5 on TestFlight)
+
+**Bugs Found & Fixed:**
+1. **Paywall state stuck between recordings** — `.onReceive(audioService.$didHitFreeLimit)` fired with stale `true` value from previous recording before `startRecording()` could reset it. Fix: added `&& hasStartedRecording` guard in RecordingView.swift:157.
+2. **Live Activity stuck on Lock Screen after force-kill** — `endLiveActivity()` never called when app is killed. Fix: added `cleanUpStaleLiveActivities()` in PulseApp.swift `init()` that ends all lingering `RecordingActivityAttributes` activities on launch.
+
+**Tests Completed:** 1.1 (Pass), 1.2 (Pass), 1.3 (Pass)
+**Tests Deferred (IAP not configured):** 1.4, 2.1-2.3, 8.1-8.5, 8.7, 9.3, 10.2, 10.3
+
+### App Store Connect — IAP Setup Required
+
+The in-app purchase product `com.jpcostan.Pulse.pro.lifetime` was created in App Store Connect but has status "Missing Metadata". It must be fully configured before purchase-related tests can run on TestFlight. See the checklist below.
+
+---
+
+## App Store Connect IAP Setup Checklist
+
+The following steps must be completed in App Store Connect to make the Pro Lifetime in-app purchase work in TestFlight sandbox.
+
+### Step 1: Complete IAP Metadata (App Store Connect > Monetization > In-App Purchases)
+
+Open the `com.jpcostan.Pulse.pro.lifetime` product and fill in:
+
+| Field | Value |
+|-------|-------|
+| **Reference Name** | Pro Lifetime |
+| **Product ID** | `com.jpcostan.Pulse.pro.lifetime` (already set) |
+| **Type** | Non-Consumable (already set) |
+| **Price** | $5.99 (Price Tier — select from price schedule) |
+| **Display Name** (Localization > English) | Pulsio Pro |
+| **Description** (Localization > English) | Unlock unlimited recording time. Record meetings up to 60 minutes with a one-time purchase. All processing stays on your device. |
+| **Screenshot** | Take a screenshot of the PaywallView on device (showing the purchase UI). Must be at least 640x920 pixels. |
+| **Review Notes** | This is a one-time non-consumable purchase that removes the 3-minute recording limit for free users, allowing recordings up to 60 minutes. |
+
+### Step 2: Set Up Pricing (App Store Connect > Monetization > In-App Purchases > Pricing)
+
+- Click "Add Pricing" or "Set Price"
+- Select **$5.99** (USD) as the base price
+- Apple will auto-calculate international prices — review and confirm
+
+### Step 3: Link IAP to App Version (App Store Connect > App > Your App Version)
+
+- Go to your app's version page (the one with build 5)
+- Scroll to **"In-App Purchases and Subscriptions"** section
+- Click the **"+"** button to add the IAP
+- Select `com.jpcostan.Pulse.pro.lifetime`
+- This links it to the version for review submission
+
+### Step 4: Verify Status
+
+After completing all metadata, the IAP status should change from "Missing Metadata" to **"Ready to Submit"**.
+
+### Step 5: Test on TestFlight
+
+- Install the latest TestFlight build (build 5+)
+- The IAP should now load in sandbox mode
+- Test purchasing from both the paywall (3-min limit) and Settings > Upgrade to Pro
+- Use a sandbox Apple ID for testing (Settings > App Store > Sandbox Account on device)
+
+### After IAP Works — Resume Deferred Tests
+
+Once the purchase works in TestFlight sandbox, run these deferred tests:
+- **1.4** — Purchase Pro from 3-min paywall
+- **2.1-2.3** — Pro recording (past 3 min, 45-min warning, 60-min auto-stop)
+- **8.1-8.5, 8.7** — Full StoreKit test suite
+- **9.3** — Onboarding purchase button
+- **10.2, 10.3** — Pro Settings view, restore purchases
+
+---
+
+3/2/26
+## Session Summary
+
+### Phase 12 Manual Testing — Continued (Builds 8–12)
+
+**Bugs Found & Fixed:**
+1. **Action items coalescing into one (Build 7→8)** — During test 5.1, spoke 3 distinct action items but only 1 was detected. Root cause: speech recognition produced unpunctuated run-on text, and `NLTokenizer(.sentence)` treated it as a single sentence, so only one pattern matched. Fix: added `splitCompoundSentence()` in `ActionDetectionService.swift` — a post-processor that splits sentences >80 chars at conjunction + subject + action verb boundaries.
+2. **Third-person assignments not detected (Build 8→9)** — Build 8 re-test showed compound splitting partially worked (source text was shorter), but "Josh needs to send..." and "Sarah should update..." still not detected. Root cause: action patterns only covered first/second person ("I need to", "we need to", "you should") — no patterns for "[Name] needs to / should". Fix: added 4 third-person patterns (`\w+ needs to`, `\w+ should`, `\w+ has to`, `\w+ must`) with `requiresTaskContext: true`.
+3. **"also" breaking team patterns + case-sensitive splitting (Build 9→10)** — Build 9 re-test detected 2 of 3 items. "we also have to finalize..." missed because `"we have to "` didn't match with "also" in between. Compound splitter also missed mid-sentence "I need to" due to case sensitivity. Fix: team patterns now accept optional "also" (`"we (also )?have to "`), and compound splitter uses `.caseInsensitive` regex. Test 5.1 passed Build 10 (3/3). Tests 5.2, 5.3 also passed.
+4. **Negation filter too narrow (Build 10→11)** — Test 5.4: "I'm not going to schedule that meeting anymore" falsely detected. Negation filter only checked "don't/do not" at sentence start. Fix: expanded `isNegated()` with 16 mid-sentence negation phrases ("not going to", "won't", "shouldn't", "can't", "decided not to", "no longer", etc.). All 121 tests pass. Section 5 complete (5.1–5.8 all Pass).
+
+**Enhancement:**
+5. **Swipe-to-delete action items (Build 12)** — During test 6.1, discovered users can add items via "+" but have no way to delete them. Fix: added `.swipeActions` on ActionItemRow in ActionReviewView.swift. Swipe left to delete from Core Data.
+
+6. **Edited title not used by Reminders/Calendar (Build 12→13)** — During test 6.2, editing a title and tapping "Create Reminders" used the original title. `saveTitle()` only fired on Return key, not on focus loss. Fix: added `.onChange(of: titleFocused)` to call `saveTitle()` when TextField loses focus. All 121 tests pass.
+
+**Test Results:** Sections 4, 5, 6 complete. Next: Section 7 (Reminders & Calendar).
+
+### To Resume
+> "Read CLAUDE.md, prompt.md, MEMORY.md and MANUALTESTING.md for project context. Phase 12 manual testing is in progress — Build 13 on TestFlight. Sections 1, 3, 4, 5, 6 complete. Next: Section 7 (Reminders & Calendar). IAP setup in App Store Connect must be completed before purchase-related tests can run. Continue manual testing on non-purchase tests, then circle back to deferred tests after IAP is configured."
+
+3/3/26
+## Session Summary
+
+### Phase 12 Manual Testing — Section 7, Continued (Builds 13–14)
+
+**Section 7 progress:** Tests 7.1–7.6 all Pass. Test 7.7 blocked by transcription clipping bug, needs re-test on Build 14.
+
+**Bugs Found & Fixed:**
+1. **Speech recognition clipping first sentence in short recordings (Build 13→14)** — During test 7.7, short recordings (~11s) consistently lost the first spoken sentence from the transcript. Root cause: `TranscriptionService` re-exported ALL recordings through `AVAssetExportSession` before sending to the speech recognizer, even single-chunk recordings (≤30s) that didn't need splitting. AAC re-encoding introduces encoder delay and keyframe alignment issues at CMTime 0, clipping the first ~1-2 seconds. Fix: single-chunk recordings now skip the export and pass the original audio file directly to `SFSpeechURLRecognitionRequest`. Multi-chunk exports still work as before.
+2. **First-person "also" patterns missing (Build 14)** — "I also need to send the report" didn't match the `"i need to "` pattern. Same issue previously fixed for team patterns ("we also need to") but never applied to first-person. Fix: added optional "also" to first-person patterns: `"i (also )?need to "`, `"i (also )?have to "`, `"i (also )?should "`, `"i (also )?must "`.
+
+**Files Modified:**
+- `Services/TranscriptionService.swift` — Skip AVAssetExportSession for single-chunk recordings
+- `Services/ActionDetectionService.swift` — First-person "also" optional in patterns
+
+**Test 7.7 — PASSED on Build 14.** Excluded items not synced to Reminders or Calendar. Section 7 complete.
+
+**Additional fix (Build 15):**
+3. **Meeting/appointment pattern false positive** — "All right so that meeting we went pretty well" falsely detected at 75%. The `meeting (on |at |this |next |)` pattern had an empty alternative matching ANY "meeting " occurrence. Fix: removed empty alternatives from `meeting` and `appointment` patterns, added `with ` and `for ` as valid prepositions. Same issue didn't exist on `call` pattern (already had no empty alternative). All 121 tests pass.
+
+**Files Modified:**
+- `Services/ActionDetectionService.swift` — Removed empty regex alternatives from meeting/appointment patterns
+
+**Test Results:** All 121 tests pass. Build succeeds. Sections 1, 3, 4, 5, 6, 7 complete. Tests 5.2/5.3 should be re-verified on Build 15 as regression check after meeting pattern change.
+
+### To Resume
+> "Read CLAUDE.md, prompt.md, MEMORY.md and MANUALTESTING.md for project context. Phase 12 manual testing is in progress — Build 15 on TestFlight. Sections 1, 3, 4, 5, 6, 7 complete. Re-test 5.2/5.3 on Build 15 as false-positive regression check after meeting pattern fix. Next: Section 8 (Monetization — mostly deferred pending IAP setup), then Sections 9+. IAP setup in App Store Connect must be completed before purchase-related tests can run."

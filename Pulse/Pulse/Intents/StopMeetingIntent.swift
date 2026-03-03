@@ -45,6 +45,6 @@ struct StopMeetingIntent: AppIntent {
             ? "\(minutes) minute\(minutes == 1 ? "" : "s") and \(seconds) second\(seconds == 1 ? "" : "s")"
             : "\(seconds) second\(seconds == 1 ? "" : "s")"
 
-        return .result(dialog: "Meeting stopped. Recorded \(durationText). Open Pulse to process the recording.")
+        return .result(dialog: "Meeting stopped. Recorded \(durationText). Open Pulsio to process the recording.")
     }
 }

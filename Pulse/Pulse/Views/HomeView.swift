@@ -29,7 +29,7 @@ struct HomeView: View {
                     meetingsList
                 }
             }
-            .navigationTitle("Pulse")
+            .navigationTitle("Pulsio")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     NavigationLink {

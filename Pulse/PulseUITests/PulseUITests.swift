@@ -27,7 +27,7 @@ final class PulseUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["Pulse"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Pulsio"].waitForExistence(timeout: 5))
     }
 
     @MainActor

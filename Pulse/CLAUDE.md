@@ -1,8 +1,8 @@
 # Pulse - Claude Development Context
 
-> **Last Updated:** 2026-02-25
-> **Current Status:** Phase 13 COMPLETE — 121 unit tests passing, CI pipeline configured
-> **Next Phase:** Phase 12 (Manual Testing on physical device), then Phase 14 (App Store Submission)
+> **Last Updated:** 2026-03-03
+> **Current Status:** Phase 12 (Manual Testing) IN PROGRESS — Build 15 on TestFlight
+> **Next Steps:** Re-test 5.2/5.3 (false positive regression check after meeting pattern fix), continue manual testing (Sections 8+), complete IAP setup in App Store Connect, then Phase 14 (App Store Submission)
 
 ---
 
@@ -56,6 +56,7 @@
 - `TranscriptionService`: On-device transcription using SFSpeechRecognizer
 - Speech recognition permission added to Info.plist
 - **Chunked Audio Processing (2026-01-27):** Splits long recordings into 30-second chunks for reliable full transcription (solves on-device recognition buffer limits)
+- **Single-chunk optimization (2026-03-03):** For recordings ≤30s (single chunk), the original audio file is passed directly to the speech recognizer instead of re-exporting via `AVAssetExportSession`. Fixes issue where AAC re-encoding clipped the first ~1-2 seconds of audio due to encoder delay and keyframe alignment at CMTime 0, causing the first spoken sentence to be lost in short recordings.
 - **Progressive Saving:** Each transcript chunk saved to Core Data immediately after processing
 - Transcripts viewable in MeetingDetailView (multiple chunks displayed in order)
 - Error handling with user-friendly alerts
@@ -64,8 +65,13 @@
 ### ✅ Phase 4: Action Engine (NaturalLanguage Framework) — COMPLETE
 - `ActionDetectionService`: On-device NLP for action item detection
 - Sentence segmentation using NLTokenizer
+- **Compound sentence splitting (2026-03-02):** Added `splitCompoundSentence()` post-processor to break run-on speech-to-text at conjunction + subject + action verb boundaries (e.g., "and Sarah should", "we also need to"). Fixes issue where speech recognition without punctuation caused multiple action items to coalesce into one.
 - Task detection via pattern matching (action verbs, commitments, requests)
 - **Expanded Patterns (2026-01-27):** Added flexible patterns like "don't forget" (without requiring "to"), "remember", "make sure", etc.
+- **Third-person assignment patterns (2026-03-02):** Added `\w+ needs to`, `\w+ should`, `\w+ has to`, `\w+ must` patterns (with `requiresTaskContext: true`) to detect assignments like "Josh needs to send the report" and "Sarah should update the spreadsheet". Previously only first/second person ("I need to", "you should", "we need to") were covered.
+- **"Also" support + case-insensitive splitting (2026-03-02):** Team and first-person patterns now accept optional "also" (e.g., `"we (also )?have to "`, `"i (also )?need to "`) so "we also have to finalize..." and "I also need to send..." are detected. Compound sentence splitter now uses `.caseInsensitive` regex so mid-sentence "I need to" (capitalized by speech recognition) triggers a split.
+- **Expanded negation filter (2026-03-02):** Previously only checked "don't/do not" at sentence start. Now also catches mid-sentence negations: "not going to", "won't", "shouldn't", "can't", "decided not to", "no longer", "no need to", etc. Fixes false positive on "I'm not going to schedule that meeting anymore".
+- **Meeting/appointment pattern false positive fix (2026-03-03):** The `meeting (on |at |this |next |)` pattern had an empty alternative `|)` that matched ANY sentence containing "meeting " — e.g., "that meeting we went pretty well" was falsely detected at 75%. Removed empty alternative, added `with ` and `for ` as valid prepositions. Same fix applied to `appointment` pattern.
 - Date extraction using NSDataDetector + relative date keywords
 - ActionItem entities created and saved to Core Data
 - ProcessingView runs action detection after transcription (2-phase processing)
@@ -73,10 +79,11 @@
 ### ✅ Phase 5: Action Review UI — COMPLETE
 - ActionReviewView now uses real ActionItem Core Data entities
 - Toggle include/exclude with persistent save
-- Editable action item titles
+- Editable action item titles (auto-saves on focus loss, not just on Return)
 - Expandable source sentences
 - Empty state when no actions detected
 - Confidence-sorted display (highest confidence first)
+- **Swipe-to-delete action items (2026-03-02):** Added `.swipeActions` on ActionItemRow in ActionReviewView so users can swipe left to delete unwanted or accidentally added items. Found during Section 6 manual testing.
 - **Audio Cleanup Option (2026-01-27):** SummaryView offers option to delete audio file after processing to save storage (keeps transcript)
 
 ### ✅ Phase 6: Reminders & Calendar Integration (EventKit) — COMPLETE
@@ -441,34 +448,191 @@ Implemented comprehensive unit tests using Swift Testing framework (`@Test` macr
 ### 📋 Phase 14: App Store Submission
 Final submission to App Store Connect after all testing passes.
 
-### 📋 Phase 15: Codebase Analysis
-Analyze the entire codebase for anything unnecessary that could or should be removed before deploying to the App Store. This includes:
-- Dead code (unused functions, variables, types)
-- Debug/development artifacts (print statements, NSLog calls, debug views, test data)
-- Unused imports and files
-- Commented-out code blocks
-- Placeholder or TODO items that should be resolved
-- Unused assets or resources
-- Redundant dependencies or frameworks
-- Any development-only features that shouldn't ship to production
+### ✅ Phase 15: Codebase Analysis & Cleanup — COMPLETE
+Audited and cleaned codebase for production readiness.
 
-**15.1 — Pulse/Pulsio Naming Audit**
-Verify the Pulse→Pulsio naming split doesn't cause issues at deployment. Check:
-- `CFBundleDisplayName` = "Pulsio" in both Debug and Release build configs
-- `CFBundleName` (if set) matches or is compatible with "Pulsio"
-- Bundle ID `com.jpcostan.Pulse` matches what's registered in App Store Connect
-- App Store Connect app name "Pulsio" matches `CFBundleDisplayName`
-- IAP product ID `com.jpcostan.Pulse.pro.lifetime` is registered in App Store Connect (uses "Pulse" in bundle ID — confirm this works)
-- Siri shortcut phrases reference "Pulsio" (not "Pulse") in `PulseShortcuts.swift`
-- All user-facing permission strings say "Pulsio" (not "Pulse")
-- URL scheme `pulse://` still works (internal, not user-visible — OK to keep)
-- No stale references to "Pulse" in user-visible strings (alerts, onboarding, settings, paywall)
-- App icon metadata and launch screen don't contain "Pulse" text
-- TestFlight and App Store screenshots/descriptions use "Pulsio"
+**15.0 — Debug Artifact Removal & NSLog Migration (2026-02-25)**
+- Removed 2 debug log lines from `PulseApp.swift` (NSLog + print launch messages)
+- Removed ~15 debug log lines from `ProcessingView.swift` (processing flow NSLogs, action detection debug dump, print warning)
+- Removed `Section("Debug: Transcript")` UI and `transcriptDebugText` computed property from `ActionReviewView.swift`
+- Migrated 2 NSLog calls in `StoreService.swift` → `Log.general.error(...)`
+- Migrated 3 NSLog calls in `AudioRecordingService.swift` → `Log.audio.info/error(...)`
+- Migrated 8 NSLog calls in `RemindersService.swift` → `Log.reminders.info/error(...)`
+- Added `import os` to StoreService, AudioRecordingService, RemindersService (required for `os.Logger` string interpolation)
+- Deleted 3 unused widget template files: `PulseWidgets.swift`, `PulseWidgetsControl.swift`, `AppIntent.swift`
+- Updated `PulseWidgetsBundle.swift` to only include `PulseWidgetsLiveActivity()`
+- `aps-environment = development` in entitlements left as-is (Xcode overrides to production at archive time)
+- Build succeeded, all 121 tests pass
+
+**15.1 — Pulse/Pulsio Naming Audit — COMPLETE (2026-02-25)**
+Audited all user-facing strings for correct "Pulsio" naming. Found and fixed 3 issues:
+- `HomeView.swift` line 32: `.navigationTitle("Pulse")` → `"Pulsio"`
+- `StopMeetingIntent.swift` line 48: "Open Pulse to process" → "Open Pulsio to process"
+- `SettingsView.swift` line 69: "Pulse Live Activity widget" / "Pulse widget" → "Pulsio" (2 occurrences)
+- `PulseUITests.swift` line 30: Updated nav bar assertion to match `"Pulsio"`
+- All other items passed: CFBundleDisplayName, permission strings, Siri phrases, bundle ID, IAP product ID, URL scheme, app icon metadata
 
 ---
 
-## Recent Session Summary (2026-02-25)
+## App Store Connect — IAP Setup Checklist
+
+> **Status:** Product `com.jpcostan.Pulse.pro.lifetime` created but has "Missing Metadata" status. Must be completed before purchase-related manual tests can run on TestFlight.
+
+### Step 1: Complete IAP Metadata
+**Location:** App Store Connect > Monetization > In-App Purchases > `com.jpcostan.Pulse.pro.lifetime`
+
+| Field | Value |
+|-------|-------|
+| Reference Name | `Pro Lifetime` |
+| Product ID | `com.jpcostan.Pulse.pro.lifetime` (already set) |
+| Type | Non-Consumable (already set) |
+| Price | $5.99 |
+| Display Name | `Pulsio Pro` |
+| Description | `Unlock unlimited recording time. Record meetings up to 60 minutes with a one-time purchase. All processing stays on your device.` |
+| Screenshot | Screenshot of PaywallView on device (min 640x920px) |
+| Review Notes | `This is a one-time non-consumable purchase that removes the 3-minute recording limit for free users, allowing recordings up to 60 minutes.` |
+
+### Step 2: Set Up Pricing
+- App Store Connect > Monetization > In-App Purchases > Pricing
+- Select **$5.99** (USD) as base price
+- Review auto-calculated international prices and confirm
+
+### Step 3: Link IAP to App Version
+- App Store Connect > Your App > Version page (build 5+)
+- Scroll to **"In-App Purchases and Subscriptions"** section
+- Click **"+"** and select `com.jpcostan.Pulse.pro.lifetime`
+
+### Step 4: Verify
+- IAP status should change to **"Ready to Submit"**
+- Install latest TestFlight build, purchase should work in sandbox
+
+### Deferred Manual Tests (waiting on IAP)
+1.4, 2.1-2.3, 8.1-8.5, 8.7, 9.3, 10.2, 10.3
+
+---
+
+## Recent Session Summary (2026-02-26)
+
+### Phase 12 Manual Testing — In Progress (Build 7 on TestFlight)
+
+**Bugs Found & Fixed:**
+1. **Paywall state stuck between recordings** — `.onReceive(audioService.$didHitFreeLimit)` fired with stale `true` from previous recording. Fix: added `&& hasStartedRecording` guard in RecordingView.swift:157.
+2. **Live Activity stuck on Lock Screen after force-kill** — Added `cleanUpStaleLiveActivities()` in PulseApp.swift `init()` to end lingering activities on launch.
+3. **Background auto-stop: timer reset to 0:00 and stale state (Build 6)** — When free tier 3-min auto-stop fired while app was backgrounded, `AVAudioRecorder.currentTime` returned 0/stale, and the `didHitFreeLimit` flag wasn't picked up by the UI. Fix: replaced `recorder.currentTime` with `Date`-based elapsed time tracking (`recordingStartDate` property in AudioRecordingService), and added foreground recovery logic in `handleAppDidBecomeActive` to re-publish `didHitFreeLimit`/`didAutoStop` flags so RecordingView transitions correctly.
+4. **Silent recording cancel leaves orphaned meeting in "processing" status (Build 7)** — When a recording with no speech hit the "No speech detected" error in ProcessingView and user tapped Cancel, the meeting remained in Core Data with status "processing". Fix: Cancel button now deletes the audio file and the meeting from Core Data before navigating back to Home.
+
+**Tests Completed:** Sections 1 (1.1–1.3 Pass), 3 (3.1–3.5 all Pass), 4 (in progress)
+**Tests Deferred:** 12 tests requiring IAP (see checklist above)
+
+---
+
+## Recent Session Summary (2026-03-03)
+
+### Phase 12 Manual Testing — Section 7 (Builds 13–14)
+
+**Tests Completed:** Section 7 tests 7.1–7.6 all Pass.
+
+**Bug Fix 6 — Speech recognition clipping first sentence in short recordings (Build 14):**
+- **Problem:** During test 7.7, short recordings (~11s) consistently lost the first sentence from the transcript. Even with 3-second pauses and preamble, only the second sentence appeared. Affected all short recordings in Section 7 testing.
+- **Root Cause:** For all recordings (including single-chunk ≤30s), the audio was re-exported via `AVAssetExportSession` with `AVAssetExportPresetAppleM4A` before being sent to the speech recognizer. AAC re-encoding introduces encoder delay (priming frames) and keyframe alignment issues at CMTime 0, which can clip the first ~1-2 seconds of audio. For short recordings, this was enough to lose the entire first sentence.
+- **Fix:** In `TranscriptionService.swift`, single-chunk recordings (chunkCount == 1) now skip the export step entirely and pass the original audio file URL directly to `SFSpeechURLRecognitionRequest`. The export is only used when splitting longer recordings into time-ranged chunks. All 121 tests pass.
+
+**Fix 7 — First-person "also" patterns (Build 14):**
+- **Problem:** "I also need to send the report" didn't match the "I need to" pattern. Same issue previously fixed for team patterns ("we also need to") but never applied to first-person.
+- **Fix:** Added optional "also" to first-person patterns in `ActionDetectionService.swift`: `"i (also )?need to "`, `"i (also )?have to "`, `"i (also )?should "`, `"i (also )?must "`.
+
+**Test 7.7 — PASSED on Build 14.** Toggled off one item, created reminders + calendar. Only the included item appeared in Reminders and Calendar. Excluded item not synced. Section 7 complete.
+
+**Bug Fix 8 — Meeting/appointment pattern false positive (Build 15):**
+- **Problem:** During 7.7 testing, "All right so that meeting we went pretty well" was falsely detected at 75% confidence. Root cause: `meeting (on |at |this |next |)` pattern had an empty alternative `|)` that matched ANY sentence containing "meeting " regardless of context. Same bug on `appointment` pattern.
+- **Fix:** Removed empty alternatives from `meeting` and `appointment` patterns in `ActionDetectionService.swift`. Added `with ` and `for ` as valid prepositions: `"meeting (on |at |this |next |with |for )"`. All 121 tests pass.
+
+**Issue noted — Kevin's sentence not transcribed:** "Kevin should reach out to the design agency before Thursday" was not detected during 7.7 testing. Investigation confirmed the detection logic is correct (`\w+ should` + "thursday" task context). Likely a transcription issue — sentence at end of ~30s recording may not have been captured cleanly by SFSpeechRecognizer. No code fix needed.
+
+**Test Results:** Section 7 complete (7.1–7.7 all Pass). Sections 1, 3, 4, 5, 6 complete. Tests 5.2/5.3 should be re-verified on Build 15 as regression check after meeting pattern change.
+
+---
+
+## Previous Session Summary (2026-03-02)
+
+### Phase 12 Manual Testing — Sections 4, 5, 6 (Builds 8–12)
+
+**Bug Fix 1 — Compound sentence splitting for action detection (Build 8):**
+- **Problem:** Speech recognition often omits punctuation, producing long run-on sentences. `NLTokenizer(.sentence)` couldn't split them, so multiple action items in one recording were coalesced into a single detected action. During test 5.1, 3 distinct action items ("send the report by Friday", "schedule a follow-up meeting", "update the budget spreadsheet") were merged into 1.
+- **Fix:** Added `splitCompoundSentence()` in `ActionDetectionService.swift` that runs after NLTokenizer. It splits sentences >80 chars at conjunction + subject + action verb boundaries (e.g., "and [Name] should", "we also need to", "we need to" mid-sentence).
+
+**Bug Fix 2 — Missing third-person assignment patterns (Build 9):**
+- **Problem:** Build 8 re-test of 5.1 showed the compound splitting was partially working (source text was shorter), but "Josh needs to send..." and "Sarah should update..." were still not detected as action items. Root cause: action patterns only covered first/second person ("I need to", "we need to", "you should") — no patterns for third-person "[Name] needs to / should / has to / must".
+- **Fix:** Added 4 new third-person patterns in `ActionDetectionService.swift`: `\w+ needs to`, `\w+ should`, `\w+ has to`, `\w+ must` (all with `requiresTaskContext: true` to prevent false positives).
+
+**Bug Fix 3 — "also" in team patterns + case-insensitive splitting (Build 10):**
+- **Problem:** Build 9 re-test detected 2 of 3 items. "we also have to finalize the budget spreadsheet by Thursday" was missed because `"we have to "` pattern didn't match with "also" in between. Also, compound splitter wasn't splitting before "I need to" mid-sentence because regex was case-sensitive and speech recognition capitalizes "I".
+- **Fix:** Made team patterns accept optional "also" (`"we (also )?have to "`, `"we (also )?need to "`, `"we (also )?should "`). Made compound sentence splitter use `.caseInsensitive` regex. Test 5.1 passed on Build 10 (3/3 items). Tests 5.2, 5.3 also passed.
+
+**Bug Fix 4 — Negation filter too narrow (Build 11):**
+- **Problem:** Test 5.4 on Build 10 — "I'm not going to schedule that meeting anymore" was falsely detected as an action item. The negation filter only checked for "don't/do not" at the start of a sentence, missing mid-sentence negations like "not going to", "won't", "shouldn't", etc.
+- **Fix:** Expanded `isNegated()` to check for 16 negation phrases anywhere in the sentence: "not going to", "won't", "will not", "wouldn't", "shouldn't", "can't", "cannot", "decided not to", "no longer", "no need to", etc. All 121 tests pass.
+- **Re-test required:** Test 5.4 needs re-testing on Build 11.
+
+**Enhancement — Swipe-to-delete action items (Build 12):**
+- **Problem:** During test 6.1, discovered users can add action items via "+" but have no way to delete them. Accidentally added or empty items are stuck.
+- **Fix:** Added `.swipeActions(edge: .trailing, allowsFullSwipe: true)` on `ActionItemRow` in `ActionReviewView.swift`. Swipe left to delete, using existing Core Data save pattern (`viewContext.delete(item)` + `try? viewContext.save()`). 6.1 passed on Build 12.
+
+**Bug Fix 5 — Edited title not used by Reminders/Calendar (Build 13):**
+- **Problem:** During test 6.2, editing an action item's title and then tapping "Create Reminders" used the original title, not the edited one. Root cause: `saveTitle()` only fired on `onCommit` (pressing Return). If the user tapped away without pressing Return, the edit stayed in local `@State editedTitle` but was never written back to Core Data.
+- **Fix:** Added `.onChange(of: titleFocused)` in `ActionItemRow` to call `saveTitle()` when the TextField loses focus. All 121 tests pass.
+
+**Test Results:** Section 4 complete (4.1–4.3 Pass, 4.4 skipped, 4.5 Pass). Section 5 complete (5.1–5.8 all Pass). Section 6 complete (6.1–6.8 all Pass). Next: Section 7 (Reminders & Calendar).
+
+---
+
+## Recent Session Summary (2026-03-01)
+
+### Phase 12 Manual Testing — Sections 1, 3, 4
+
+**Bug Fix 1 — Background auto-stop stale state:**
+- `AudioRecordingService.swift`: Added `recordingStartDate: Date?` property to track elapsed time independently of `AVAudioRecorder.currentTime` (which returns 0/stale in background)
+- Timer callback now uses `Date().timeIntervalSince(startDate)` instead of `recorder.currentTime`
+- `stopRecording()` calculates duration from `recordingStartDate`
+- `handleAppDidBecomeActive` now re-publishes `didHitFreeLimit`/`didAutoStop` flags when auto-stop occurred while backgrounded, so RecordingView picks up the transition
+- Also syncs `currentTime` from `recordingStartDate` on foreground return during active recording
+
+**Bug Fix 2 — Orphaned meeting on silent recording cancel:**
+- `ProcessingView.swift`: Cancel button on "Processing Error" alert now deletes the audio file via `AudioRecordingService.shared.deleteAudioFile(for:)` and deletes the meeting from Core Data before calling `onComplete()`
+
+**Test Results:** Section 3 (Background & Live Activity) — 5/5 Pass. Section 4 (Transcription) — in progress.
+
+---
+
+## Previous Session Summary (2026-02-25)
+
+### Phase 15 Codebase Cleanup & Phase 15.1 Naming Audit Complete
+
+**Phase 15.0 — Debug Artifact Removal & NSLog Migration:**
+- Removed debug NSLog/print statements from PulseApp.swift, ProcessingView.swift
+- Removed debug transcript UI section from ActionReviewView.swift (Section + computed property)
+- Migrated 13 NSLog calls → LoggingService (`Log.general`, `Log.audio`, `Log.reminders`) in StoreService, AudioRecordingService, RemindersService
+- Added `import os` to 3 service files (required for `os.Logger` string interpolation)
+- Deleted 3 unused widget template files (PulseWidgets.swift, PulseWidgetsControl.swift, AppIntent.swift)
+- Updated PulseWidgetsBundle.swift to only register PulseWidgetsLiveActivity
+
+**Phase 15.1 — Naming Audit:**
+- Found and fixed 3 user-facing "Pulse" → "Pulsio" strings: HomeView nav title, StopMeetingIntent dialog, SettingsView Live Activity instructions
+- Updated PulseUITests nav bar assertion to match
+- All other naming items passed audit (CFBundleDisplayName, permissions, Siri phrases, bundle ID, IAP, URL scheme, app icon)
+
+**Manual Testing Checklist:**
+- Created `MANUALTESTING.md` in project root with 104 test cases across 18 sections
+- Includes checkboxes, pass/fail columns, notes fields, and summary table
+
+**Build & Tests:** All 121 tests pass, build succeeds
+
+### To Resume
+> "Read CLAUDE.md and prompt.md for project context. Phases 0-11, 13, 15, and 15.1 are complete. 121 tests passing with CI pipeline. Manual testing checklist ready at MANUALTESTING.md. Next: Phase 12 (Manual Testing on physical device), then Phase 14 (App Store Submission). The app is 'Pulse' internally but 'Pulsio' publicly — see Naming section."
+
+---
+
+## Previous Session Summary (2026-02-25)
 
 ### Phase 13 Unit Testing Complete — 121 Tests Passing
 
@@ -494,17 +658,9 @@ Verify the Pulse→Pulsio naming split doesn't cause issues at deployment. Check
 
 **Coverage:** ActionDetectionService 88.89%, Persistence 86.67%, overall app 24.61% (views untestable without UI tests)
 
-**Naming Documentation Added:**
-- Added "Naming: Pulse vs Pulsio" section to CLAUDE.md with full mapping table
-- Updated prompt.md header with naming note
-- Added Phase 15.1 naming audit checklist for pre-deployment
-
 **CI Pipeline Created:**
 - `.github/workflows/tests.yml` — runs on every push, `macos-26` runner, Xcode 26.2, uploads test results artifact
 - `.gitignore` updated with signing certs, secrets, test output, SPM artifacts
-
-### To Resume
-> "Read CLAUDE.md and prompt.md for project context. Phase 13 unit testing is complete (121 tests passing). CI pipeline configured. Ready for Phase 12 (Manual Testing on physical device) or Phase 14 (App Store Submission). Phase 15 (Codebase Analysis) and Phase 15.1 (Naming Audit) still pending."
 
 ---
 
@@ -796,8 +952,9 @@ Pulse/
 │   └── Assets.xcassets/
 ├── PulseWidgets/                   # Widget Extension for Live Activities
 │   ├── PulseWidgetsLiveActivity.swift   # Live Activity UI (lock screen + Dynamic Island)
-│   ├── PulseWidgetsBundle.swift    # Widget bundle registration
+│   ├── PulseWidgetsBundle.swift    # Widget bundle registration (Live Activity only)
 │   └── Info.plist
+├── MANUALTESTING.md                # 104-test manual testing checklist for Phase 12
 ├── PulseTests/
 └── PulseUITests/
 ```
@@ -875,7 +1032,7 @@ Pulse/
 
 Tell the next Claude session:
 
-> "Read CLAUDE.md and prompt.md for project context. Phases 0-11 and 13 are complete. 121 unit tests passing with CI pipeline on GitHub Actions. Ready for Phase 12 (Manual Testing on physical device), Phase 14 (App Store Submission), or Phase 15 (Codebase Analysis + 15.1 Naming Audit). Key note: the app is 'Pulse' internally but 'Pulsio' publicly — see Naming section in CLAUDE.md."
+> "Read CLAUDE.md and prompt.md for project context. Phases 0-11, 13, 15, and 15.1 are complete. 121 tests passing with CI pipeline. Manual testing checklist ready at MANUALTESTING.md. Next: Phase 12 (Manual Testing on physical device), then Phase 14 (App Store Submission). The app is 'Pulse' internally but 'Pulsio' publicly — see Naming section."
 
 ---
 
@@ -918,7 +1075,7 @@ xcodebuild -scheme Pulse -destination 'platform=iOS Simulator,name=iPhone 17' bu
 ## Known Issues / Notes
 
 - **Console Logging:** NSLog/print statements don't appear in Xcode console. Switched to `os.Logger` API - use Console.app with filter `subsystem:com.jpcostan.Pulse` to view logs.
-- **Action Detection at Boundaries:** Action items spoken at very beginning or end of recordings sometimes not detected. Currently debugging - transcript chunks may have boundary issues.
+- **Action Detection at Boundaries:** RESOLVED (2026-03-03). First sentence in short recordings was consistently lost. Root cause: `AVAssetExportSession` AAC re-encoding clipped the first ~1-2 seconds. Fix: single-chunk recordings (≤30s) skip export and use original audio file directly.
 - **Chunk Concatenation:** Transcript chunks now joined with ". " to ensure proper sentence segmentation between chunks.
 - **On-Device Model Required:** Transcription requires the on-device English speech recognition model to be downloaded. Users should go to Settings > General > Keyboard > Dictation and ensure the English language is downloaded for offline use.
 - **Spelled-out Numbers:** Now supports "at nine" → "at 9" conversion for date parsing. Covers one-twelve, noon, midnight.

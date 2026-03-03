@@ -44,6 +44,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
     private var hasShownDurationWarning = false
     private var liveActivity: Activity<RecordingActivityAttributes>?
     private var meetingTitle: String = "Meeting"
+    private var recordingStartDate: Date?
 
     // MARK: - Audio Recording Error
 
@@ -192,6 +193,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
 
         isRecording = true
         currentTime = 0
+        recordingStartDate = Date()
         remainingTime = Self.maxRecordingDuration
         self.error = nil
         showDurationWarning = false
@@ -215,11 +217,19 @@ final class AudioRecordingService: NSObject, ObservableObject {
             return nil
         }
 
-        let duration = recorder.currentTime
+        // Use Date-based duration instead of recorder.currentTime,
+        // which can be stale/zero when stopping from background
+        let duration: TimeInterval
+        if let startDate = recordingStartDate {
+            duration = Date().timeIntervalSince(startDate)
+        } else {
+            duration = recorder.currentTime
+        }
         recorder.stop()
 
         stopTimers()
         isRecording = false
+        recordingStartDate = nil
 
         // End Live Activity
         endLiveActivity()
@@ -237,6 +247,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         audioRecorder?.stop()
         stopTimers()
         isRecording = false
+        recordingStartDate = nil
 
         // End Live Activity
         endLiveActivity()
@@ -321,8 +332,12 @@ final class AudioRecordingService: NSObject, ObservableObject {
         let recordingTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor [weak self] in
-                guard let self, let recorder = self.audioRecorder, self.isRecording else { return }
-                self.currentTime = recorder.currentTime
+                guard let self, self.audioRecorder != nil, self.isRecording else { return }
+                // Use Date-based elapsed time instead of recorder.currentTime,
+                // which can return 0 or stale values when the app is backgrounded
+                if let startDate = self.recordingStartDate {
+                    self.currentTime = Date().timeIntervalSince(startDate)
+                }
                 self.remainingTime = Self.maxRecordingDuration - self.currentTime
 
                 // Update Live Activity
@@ -472,8 +487,24 @@ final class AudioRecordingService: NSObject, ObservableObject {
         Task { @MainActor in
             if isRecording {
                 Log.audio.info("App returned to foreground - recording active")
+                // Sync currentTime from Date-based tracking
+                if let startDate = recordingStartDate {
+                    currentTime = Date().timeIntervalSince(startDate)
+                }
                 // Ensure audio session is still active
                 try? AVAudioSession.sharedInstance().setActive(true)
+            } else if didHitFreeLimit || didAutoStop {
+                // Auto-stop fired while backgrounded — re-publish flags
+                // so RecordingView can pick up the state transition
+                Log.audio.info("App returned to foreground - auto-stop occurred in background")
+                if didHitFreeLimit {
+                    didHitFreeLimit = false
+                    didHitFreeLimit = true
+                }
+                if didAutoStop {
+                    didAutoStop = false
+                    didAutoStop = true
+                }
             }
         }
     }
