@@ -1072,7 +1072,16 @@ Once the purchase works in TestFlight sandbox, run these deferred tests:
 **Files Modified:**
 - `Services/ActionDetectionService.swift` — Removed empty regex alternatives from meeting/appointment patterns
 
-**Test Results:** All 121 tests pass. Build succeeds. Sections 1, 3, 4, 5, 6, 7 complete. Tests 5.2/5.3 should be re-verified on Build 15 as regression check after meeting pattern change.
+**Tests 5.2/5.3 re-tested on Build 15 — both PASSED.** No regressions from meeting pattern fix.
+
+**Unit test expansion (121 → 135 tests):**
+Added 14 new tests in `ActionDetectionTests.swift` covering all bugs found during manual testing:
+- Meeting/appointment pattern false positives (4 tests)
+- First-person "also" patterns (3 tests)
+- Mid-sentence negation filtering (4 tests)
+- Third-person assignment patterns (3 tests)
+
+**Test Results:** All 135 tests pass. Build succeeds. Sections 1, 3, 4, 5, 6, 7 complete.
 
 ### To Resume
-> "Read CLAUDE.md, prompt.md, MEMORY.md and MANUALTESTING.md for project context. Phase 12 manual testing is in progress — Build 15 on TestFlight. Sections 1, 3, 4, 5, 6, 7 complete. Re-test 5.2/5.3 on Build 15 as false-positive regression check after meeting pattern fix. Next: Section 8 (Monetization — mostly deferred pending IAP setup), then Sections 9+. IAP setup in App Store Connect must be completed before purchase-related tests can run."
+> "Read CLAUDE.md, prompt.md, MEMORY.md and MANUALTESTING.md for project context. Phase 12 manual testing is in progress — Build 15 on TestFlight. Sections 1, 3, 4, 5, 6, 7 complete (all pass). 135 unit tests passing. **Next immediate step:** Complete IAP setup in App Store Connect (see CLAUDE.md 'IAP Setup Checklist') to get Pro purchases working in TestFlight. Once IAP is live, resume manual testing at Section 8 (Monetization/StoreKit) and unblock the 12 deferred tests that require Pro. Then continue Sections 9–18."

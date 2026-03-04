@@ -8,6 +8,13 @@ import CoreData
 struct PersistenceController {
     static let shared = PersistenceController()
 
+    /// Shared managed object model — loaded once to prevent Core Data entity
+    /// disambiguation crashes when multiple containers exist (e.g., in tests).
+    private static let model: NSManagedObjectModel = {
+        let modelURL = Bundle.main.url(forResource: "Pulse", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
+    }()
+
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
@@ -34,7 +41,7 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "Pulse")
+        container = NSPersistentContainer(name: "Pulse", managedObjectModel: Self.model)
 
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")

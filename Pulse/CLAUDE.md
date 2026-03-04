@@ -2,7 +2,7 @@
 
 > **Last Updated:** 2026-03-03
 > **Current Status:** Phase 12 (Manual Testing) IN PROGRESS — Build 15 on TestFlight
-> **Next Steps:** Re-test 5.2/5.3 (false positive regression check after meeting pattern fix), continue manual testing (Sections 8+), complete IAP setup in App Store Connect, then Phase 14 (App Store Submission)
+> **Next Steps:** Complete IAP setup in App Store Connect (see checklist below) to get Pro working in TestFlight, then finish manual testing (Sections 8–18), then Phase 14 (App Store Submission)
 
 ---
 
@@ -334,8 +334,9 @@ Comprehensive manual test pass on a physical device covering every user-facing f
 - App icon renders correctly at all sizes
 - Launch screen displays properly
 
-### ✅ Phase 13: Unit Testing (Swift Testing — 121 Tests Passing) — COMPLETE
+### ✅ Phase 13: Unit Testing (Swift Testing — 135 Tests Passing) — COMPLETE
 Implemented comprehensive unit tests using Swift Testing framework (`@Test` macro). In-memory Core Data contexts for test isolation. ActionDetectionService at 88.89% coverage, Persistence at 86.67%.
+- **Test expansion (2026-03-03):** Added 14 new tests covering bugs found during manual testing: meeting/appointment pattern false positives (4 tests), first-person "also" patterns (3 tests), mid-sentence negation filtering (4 tests), third-person assignment patterns (3 tests). Total: 121 → 135 tests.
 
 **13.1 — ActionDetectionService Tests** (highest priority — 773 LOC)
 - Sentence segmentation: single sentence, multiple sentences, empty string
@@ -549,7 +550,16 @@ Audited all user-facing strings for correct "Pulsio" naming. Found and fixed 3 i
 
 **Issue noted — Kevin's sentence not transcribed:** "Kevin should reach out to the design agency before Thursday" was not detected during 7.7 testing. Investigation confirmed the detection logic is correct (`\w+ should` + "thursday" task context). Likely a transcription issue — sentence at end of ~30s recording may not have been captured cleanly by SFSpeechRecognizer. No code fix needed.
 
-**Test Results:** Section 7 complete (7.1–7.7 all Pass). Sections 1, 3, 4, 5, 6 complete. Tests 5.2/5.3 should be re-verified on Build 15 as regression check after meeting pattern change.
+**Tests 5.2/5.3 re-tested on Build 15 — both PASSED.** Casual conversation mentioning "meeting" and fictional story mentioning both "meeting" and "appointment" correctly filtered after pattern fix. No regressions.
+
+**Unit test expansion (135 tests, up from 121):**
+Added 14 new tests in `ActionDetectionTests.swift` covering bugs found during manual testing:
+- Meeting/appointment false positives (4): `filtersMeetingMentionWithoutPreposition`, `filtersCasualMeetingReference`, `detectsMeetingWithPreposition`, `detectsMeetingForPreposition`
+- First-person "also" patterns (3): `detectsIAlsoNeedTo`, `detectsIAlsoShouldWithTaskContext`, `detectsWeAlsoNeedTo`
+- Mid-sentence negation (4): `filtersNotGoingToMidSentence`, `filtersWontNegation`, `filtersShouldntNegation`, `filtersDecidedNotTo`
+- Third-person assignments (3): `detectsThirdPersonNeedsTo`, `detectsThirdPersonShould`, `filtersThirdPersonShouldWithoutTaskContext`
+
+**Test Results:** Sections 1, 3, 4, 5, 6, 7 complete. 135 unit tests passing. Next: Complete IAP setup in App Store Connect, then resume manual testing at Section 8.
 
 ---
 

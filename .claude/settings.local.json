@@ -12,7 +12,8 @@
       "Bash(xcrun xccov:*)",
       "Bash(git status:*)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(brew list:*)"
     ]
   }
 }
