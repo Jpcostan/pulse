@@ -13,7 +13,15 @@
       "Bash(git status:*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(brew list:*)"
+      "Bash(brew list:*)",
+      "WebFetch(domain:jpcostan.github.io)",
+      "Bash(xcrun simctl boot 001031E7-0B4A-403F-A5B3-453598312A3A)",
+      "Bash(xcrun simctl io 001031E7-0B4A-403F-A5B3-453598312A3A screenshot /tmp/test_screenshot.png)",
+      "Read(//tmp/**)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/test_screenshot.png)",
+      "Bash(do echo:*)",
+      "Bash(do:*)",
+      "Bash(ls:*)"
     ]
   }
 }

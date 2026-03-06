@@ -211,6 +211,11 @@ struct OnboardingView: View {
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
                 }
+
+                Text("By purchasing, you agree to our [Terms of Use](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/) and [Privacy Policy](https://jpcostan.github.io/pulse/privacy-policy).")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
             .padding(.bottom, 56)
         }
