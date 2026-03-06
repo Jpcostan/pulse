@@ -1,8 +1,8 @@
 # Pulse - Claude Development Context
 
-> **Last Updated:** 2026-03-03
-> **Current Status:** Phase 12 (Manual Testing) IN PROGRESS — Build 15 on TestFlight
-> **Next Steps:** Complete IAP setup in App Store Connect (see checklist below) to get Pro working in TestFlight, then finish manual testing (Sections 8–18), then Phase 14 (App Store Submission)
+> **Last Updated:** 2026-03-05
+> **Current Status:** Phase 14 (App Store Submission) — Build 15 on TestFlight
+> **Next Steps:** Complete App Store submission checklist (see "Next Session" section below)
 
 ---
 
@@ -475,40 +475,84 @@ Audited all user-facing strings for correct "Pulsio" naming. Found and fixed 3 i
 
 ---
 
-## App Store Connect — IAP Setup Checklist
+## App Store Connect — IAP Setup ✅ COMPLETE (2026-03-03)
 
-> **Status:** Product `com.jpcostan.Pulse.pro.lifetime` created but has "Missing Metadata" status. Must be completed before purchase-related manual tests can run on TestFlight.
-
-### Step 1: Complete IAP Metadata
-**Location:** App Store Connect > Monetization > In-App Purchases > `com.jpcostan.Pulse.pro.lifetime`
+> **Status:** "Ready to Submit" — sandbox purchase verified working on TestFlight Build 15.
 
 | Field | Value |
 |-------|-------|
 | Reference Name | `Pro Lifetime` |
-| Product ID | `com.jpcostan.Pulse.pro.lifetime` (already set) |
-| Type | Non-Consumable (already set) |
-| Price | $5.99 |
+| Product ID | `com.jpcostan.Pulse.pro.lifetime` |
+| Type | Non-Consumable |
+| Price | $5.99 (all countries/regions) |
 | Display Name | `Pulsio Pro` |
-| Description | `Unlock unlimited recording time. Record meetings up to 60 minutes with a one-time purchase. All processing stays on your device.` |
-| Screenshot | Screenshot of PaywallView on device (min 640x920px) |
+| Description | `Unlimited recording time, up to 60 minutes.` |
+| Review Screenshot | PaywallView screenshot uploaded |
 | Review Notes | `This is a one-time non-consumable purchase that removes the 3-minute recording limit for free users, allowing recordings up to 60 minutes.` |
 
-### Step 2: Set Up Pricing
-- App Store Connect > Monetization > In-App Purchases > Pricing
-- Select **$5.99** (USD) as base price
-- Review auto-calculated international prices and confirm
-
-### Step 3: Link IAP to App Version
-- App Store Connect > Your App > Version page (build 5+)
-- Scroll to **"In-App Purchases and Subscriptions"** section
-- Click **"+"** and select `com.jpcostan.Pulse.pro.lifetime`
-
-### Step 4: Verify
-- IAP status should change to **"Ready to Submit"**
-- Install latest TestFlight build, purchase should work in sandbox
-
-### Deferred Manual Tests (waiting on IAP)
+### Previously Deferred Manual Tests (NOW UNBLOCKED)
 1.4, 2.1-2.3, 8.1-8.5, 8.7, 9.3, 10.2, 10.3
+
+---
+
+## Recent Session Summary (2026-03-03, evening)
+
+### CI Pipeline Fix + IAP Setup Complete
+
+**CI Fix — Core Data test crash:**
+- Tests were crashing with `NSInvalidArgumentException: Unacceptable type of value for to-one relationship` — Core Data couldn't disambiguate `Meeting` entity across 60+ duplicate `NSManagedObjectModel` instances.
+- Root cause: Each test's `makeInMemoryContext()` created a new `PersistenceController(inMemory: true)`, which called `NSPersistentContainer(name: "Pulse")`, loading a fresh model each time.
+- Fix: Added `private static let model` in `PersistenceController` to load the `NSManagedObjectModel` once, changed init to `NSPersistentContainer(name: "Pulse", managedObjectModel: Self.model)`.
+- All 135 tests pass, CI pipeline green.
+
+**IAP Setup in App Store Connect — COMPLETE:**
+- Filled in missing metadata for `com.jpcostan.Pulse.pro.lifetime`: display name "Pulsio Pro", description, $5.99 pricing (all countries/regions), PaywallView screenshot, review notes.
+- Status changed from "Missing Metadata" → "Ready to Submit".
+- Sandbox purchase verified working on TestFlight Build 15.
+- All 12 previously deferred manual tests now unblocked.
+
+**Files Modified:**
+- `Pulse/Persistence.swift` — Added static shared `NSManagedObjectModel`, changed container init
+
+### Next Session: Phase 14 — App Store Submission
+
+Phase 12 manual testing substantially complete (55+ tests passed, 0 failures). Remaining edge case/performance tests deferred to v2.0 based on user feedback.
+
+**App Store Submission Checklist:**
+
+1. **App Store Copy (App Store Connect → Distribution)**
+   - [ ] App description (detailed, compelling — what the app does, key features, privacy)
+   - [ ] Promotional text (170 chars, can be updated without new build)
+   - [ ] Keywords (100 char limit, comma-separated, for search optimization)
+   - [ ] Support URL (required)
+   - [ ] Marketing URL (optional)
+   - [ ] What's New text (for v1.0: can be brief)
+
+2. **Screenshots (Required — App Store Connect → Media)**
+   - [ ] 6.7" display (iPhone 16 Pro Max) — minimum 3, recommend 6-10
+   - [ ] 6.5" display (iPhone 11 Pro Max / Xs Max) — required if supporting older devices
+   - [ ] Capture key screens: Home, Recording, Action Review, Summary, Settings/Pro
+   - [ ] Consider adding text overlays describing features
+
+3. **App Review Information (App Store Connect → App Review)**
+   - [ ] Review notes — explain how to test IAP (sandbox account credentials if needed)
+   - [ ] Contact info for reviewer questions
+   - [ ] Demo account (not needed — no login)
+
+4. **Final Verification**
+   - [ ] Privacy nutrition labels confirmed in App Store Connect (no data collected)
+   - [ ] Export compliance (no encryption — already set)
+   - [ ] Age rating (4+ — already set)
+   - [ ] IAP product `com.jpcostan.Pulse.pro.lifetime` status "Ready to Submit"
+   - [ ] Verify Info.plist has all required permission strings
+   - [ ] Confirm build 15 is selected for submission (or upload new build if needed)
+
+5. **Submit**
+   - [ ] Review all fields one final time
+   - [ ] Submit for App Review
+
+**What Claude can help draft:** App description, promotional text, keywords, review notes.
+**What requires Josh in App Store Connect:** Screenshots, uploading/selecting build, final submit button.
 
 ---
 

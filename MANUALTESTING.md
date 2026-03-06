@@ -25,7 +25,7 @@
 | 1.1 | Start a recording. Verify timer runs and audio level indicator animates. | [Pass] | Pass / Fail | |
 | 1.2 | Let recording hit the 3-minute mark. Verify auto-stop occurs and paywall appears. Verify the 3-minute recording is saved. | [Pass] | Pass / Fail | |
 | 1.3 | Dismiss paywall without purchasing. Verify the 3-min recording proceeds to processing normally. | [Pass] | Pass / Fail | |
-| 1.4 | Purchase Pro from the paywall (use StoreKit sandbox). Verify Pro status updates immediately and the paywall sheet dismisses. | [SKIP] | Skipped | **DEFERRED** — IAP product not yet configured in App Store Connect (missing metadata). First paywall state bug was fixed in build 5. Will re-test after IAP setup is complete. |
+| 1.4 | Purchase Pro from the paywall (use StoreKit sandbox). Verify Pro status updates immediately and the paywall sheet dismisses. | [Pass] | Pass | Purchased Pro from paywall on Build 15. Pro status updated immediately, paywall dismissed. |
 
 ---
 
@@ -37,10 +37,14 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 2.1 | Start recording and continue past 3 minutes. Verify no cutoff occurs. | [SKIP] | Skipped | DEFERRED — requires Pro purchase |
+
+| 2.1 | Start recording and continue past 3 minutes. Verify no cutoff occurs. | [Pass] | Pass | Recorded past 3 minutes with no cutoff or paywall. Build 15. |
+
 | 2.2 | Record until the 45-minute mark. Verify the duration warning alert appears. | [SKIP] | Skipped | DEFERRED — requires Pro purchase |
+
 | 2.3 | Record until the 60-minute mark. Verify auto-stop with graceful save (recording is preserved). | [SKIP] | Skipped | DEFERRED — requires Pro purchase |
-| 2.4 | Start a recording, then cancel it. Verify meeting is deleted from Home and audio file is cleaned up. | [ ] | Pass / Fail | Can test on Free tier (cancel before 3-min limit) |
+
+| 2.4 | Start a recording, then cancel it. Verify meeting is deleted from Home and audio file is cleaned up. | [Pass] | Pass | Cancel works correctly — meeting removed from Home, audio cleaned up. Build 15. |
 
 ---
 
@@ -152,13 +156,20 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 8.1 | Trigger the purchase flow (hit 3-min limit or tap Upgrade in Settings). Complete purchase. Verify `isPro` updates and paywall dismisses. | [SKIP] | Skipped | DEFERRED — IAP not configured in App Store Connect |
-| 8.2 | Tap "Restore Purchases." Verify entitlement is restored and UI updates to Pro. | [SKIP] | Skipped | DEFERRED — IAP not configured |
-| 8.3 | Kill the app and relaunch. Verify Pro status persists across launches. | [SKIP] | Skipped | DEFERRED — IAP not configured |
+
+| 8.1 | Trigger the purchase flow (hit 3-min limit or tap Upgrade in Settings). Complete purchase. Verify `isPro` updates and paywall dismisses. | [Pass] | Pass | Covered by test 1.4 — purchased Pro from paywall on Build 15, status updated immediately. |
+
+| 8.2 | Tap "Restore Purchases." Verify entitlement is restored and UI updates to Pro. | [Pass] | Pass | Deleted and reinstalled app — Pro status automatically restored via StoreKit 2 without manual restore. Settings shows "Pro — Lifetime". Build 15. |
+
+| 8.3 | Kill the app and relaunch. Verify Pro status persists across launches. | [Pass] | Pass | Killed and relaunched app — Settings still shows "Pro — Lifetime". Build 15. |
+
 | 8.4 | With no network (airplane mode in sandbox), attempt product loading. Verify an error message is shown (not a crash). | [SKIP] | Skipped | DEFERRED — IAP not configured |
+
 | 8.5 | Start a purchase and cancel (tap Cancel on the StoreKit sheet). Verify no state change — paywall remains, user stays Free. | [SKIP] | Skipped | DEFERRED — IAP not configured |
+
 | 8.6 | As a Free user, open Settings. Verify it shows "Free" status and "Upgrade to Pro" button. | [ ] | Pass / Fail | Can test without IAP |
-| 8.7 | As a Pro user, open Settings. Verify it shows "Pro — Lifetime" and no upgrade button. | [SKIP] | Skipped | DEFERRED — requires successful purchase |
+
+| 8.7 | As a Pro user, open Settings. Verify it shows "Pro — Lifetime" and no upgrade button. | [Pass] | Pass | Settings shows "Pro — Lifetime" status. Build 15. |
 
 ---
 
@@ -166,11 +177,11 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 9.1 | Delete and reinstall the app (or reset `hasCompletedOnboarding` in UserDefaults). Verify onboarding appears on first launch. | [ ] | Pass / Fail | |
-| 9.2 | Swipe through all 3 onboarding slides. Verify content is correct and layout looks good. | [ ] | Pass / Fail | |
+| 9.1 | Delete and reinstall the app (or reset `hasCompletedOnboarding` in UserDefaults). Verify onboarding appears on first launch. | [Pass] | Pass | Deleted and reinstalled from TestFlight — onboarding appeared on first launch. Build 15. |
+| 9.2 | Swipe through all 3 onboarding slides. Verify content is correct and layout looks good. | [Pass] | Pass | All 3 slides look good, content and layout correct. Build 15. |
 | 9.3 | On the final slide, tap the purchase button. Verify Pro status activates (sandbox). | [SKIP] | Skipped | DEFERRED — IAP not configured in App Store Connect |
-| 9.4 | On the final slide, tap "Continue for free" / skip. Verify the app works in Free mode. | [ ] | Pass / Fail | |
-| 9.5 | Launch the app a second time. Verify onboarding does NOT appear again. | [ ] | Pass / Fail | |
+| 9.4 | On the final slide, tap "Continue for free" / skip. Verify the app works in Free mode. | [Pass] | Pass | Tapped "Continue for free" — app opened to Home view, works normally. Build 15. |
+| 9.5 | Launch the app a second time. Verify onboarding does NOT appear again. | [Pass] | Pass | Killed and relaunched — onboarding did not reappear. Build 15. |
 
 ---
 
@@ -181,8 +192,8 @@
 | 10.1 | As a Free user, open Settings. Verify "Free" status badge and "Upgrade to Pro" button are visible. | [ ] | Pass / Fail | |
 | 10.2 | As a Pro user, open Settings. Verify "Pro — Lifetime" confirmation is shown and no upgrade button. | [SKIP] | Skipped | DEFERRED — requires successful purchase |
 | 10.3 | Tap "Restore Purchases" in Settings. Verify it works (restores or shows "No previous purchase found"). | [SKIP] | Skipped | DEFERRED — IAP not configured |
-| 10.4 | Verify the Live Activity section has instructional text about adding the Pulsio widget. | [ ] | Pass / Fail | |
-| 10.5 | Verify the app version and build number are displayed and show correct values. | [ ] | Pass / Fail | |
+| 10.4 | Verify the Live Activity section has instructional text about adding the Pulsio widget. | [Pass] | Pass | Live Activity section shows info about adding recording widget. Build 15. |
+| 10.5 | Verify the app version and build number are displayed and show correct values. | [Pass] | Pass | About section shows Version 1.0, Build 15. Correct. Build 15. |
 
 ---
 
@@ -190,12 +201,18 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 11.1 | Complete the full happy path: Home > Recording > Processing > Action Review > Summary > Home. Verify smooth transitions. | [ ] | Pass / Fail | |
-| 11.2 | Cancel a recording mid-flow. Verify you return to Home and the meeting is deleted from the list. | [ ] | Pass / Fail | |
-| 11.3 | Tap a past meeting in the Home list. Verify MeetingDetailView shows transcript, actions, and audio player. | [ ] | Pass / Fail | |
-| 11.4 | Swipe to delete a meeting from the Home list. Verify it is removed from the list and Core Data. | [ ] | Pass / Fail | |
-| 11.5 | Open the app via `pulse://recording` deep link (while a recording is active). Verify it navigates to RecordingView. | [ ] | Pass / Fail | |
-| 11.6 | After reaching the Summary screen and tapping Done, verify clean navigation state — no stale views on the back stack. | [ ] | Pass / Fail | |
+
+| 11.1 | Complete the full happy path: Home > Recording > Processing > Action Review > Summary > Home. Verify smooth transitions. | [Pass] | Pass | Full flow completed with smooth transitions. Build 15. |
+
+| 11.2 | Cancel a recording mid-flow. Verify you return to Home and the meeting is deleted from the list. | [Pass] | Pass | Cancelled recording — returned to Home, meeting deleted. Build 15. |
+
+| 11.3 | Tap a past meeting in the Home list. Verify MeetingDetailView shows transcript, actions, and audio player. | [Pass] | Pass | MeetingDetailView shows transcript, actions, and audio player correctly. Build 15. |
+
+| 11.4 | Swipe to delete a meeting from the Home list. Verify it is removed from the list and Core Data. | [Pass] | Pass | Swiped to delete — meeting removed from list. Build 15. |
+
+| 11.5 | Open the app via `pulse://recording` deep link (while a recording is active). Verify it navigates to RecordingView. | [Pass] | Pass | Deep link navigated to RecordingView correctly. Build 15. |
+
+| 11.6 | After reaching the Summary screen and tapping Done, verify clean navigation state — no stale views on the back stack. | [Pass] | Pass | Tapped Done on Summary — returned to Home with clean nav state, no stale views. Build 15. |
 
 ---
 
@@ -203,10 +220,10 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 12.1 | Open a completed meeting. Tap play. Verify audio plays and pause button appears. | [ ] | Pass / Fail | |
-| 12.2 | Tap skip forward (15s) and skip backward (15s). Verify the playback position updates correctly. | [ ] | Pass / Fail | |
-| 12.3 | Drag the seek slider to a new position. Verify playback jumps to the correct time. | [ ] | Pass / Fail | |
-| 12.4 | Open a meeting where the audio file was deleted (user chose cleanup in Summary). Verify no crash — the audio section should be hidden or show a graceful message. | [ ] | Pass / Fail | |
+| 12.1 | Open a completed meeting. Tap play. Verify audio plays and pause button appears. | [Pass] | Pass | Audio plays, pause button appears. Build 15. |
+| 12.2 | Tap skip forward (15s) and skip backward (15s). Verify the playback position updates correctly. | [Pass] | Pass | Skip forward/backward updates position correctly. Build 15. |
+| 12.3 | Drag the seek slider to a new position. Verify playback jumps to the correct time. | [Pass] | Pass | Seek slider jumps to correct position. Build 15. |
+| 12.4 | Open a meeting where the audio file was deleted (user chose cleanup in Summary). Verify no crash — the audio section should be hidden or show a graceful message. | [Pass] | Pass | Meeting with deleted audio handled gracefully, no crash. Build 15. |
 
 ---
 
@@ -214,10 +231,10 @@
 
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
-| 13.1 | Tap "Edit" in the transcript section. Verify TextEditor fields appear for each chunk. | [ ] | Pass / Fail | |
-| 13.2 | Modify text in a chunk, then tap "Done." Verify changes are saved to Core Data. | [ ] | Pass / Fail | |
-| 13.3 | Navigate away from the meeting and return. Verify edits persisted. | [ ] | Pass / Fail | |
-| 13.4 | Edit a multi-chunk transcript. Verify correct chunk order is maintained after editing. | [ ] | Pass / Fail | |
+| 13.1 | Tap "Edit" in the transcript section. Verify TextEditor fields appear for each chunk. | [Pass] | Pass | TextEditor fields appear for each chunk. Build 15. |
+| 13.2 | Modify text in a chunk, then tap "Done." Verify changes are saved to Core Data. | [Pass] | Pass | Modified text, tapped Done — changes saved. Build 15. |
+| 13.3 | Navigate away from the meeting and return. Verify edits persisted. | [Pass] | Pass | Navigated away and returned — edits persisted. Build 15. |
+| 13.4 | Edit a multi-chunk transcript. Verify correct chunk order is maintained after editing. | [Pass] | Pass | Edited both chunks in 2-chunk transcript — correct order maintained. Build 15. |
 
 ---
 
@@ -226,10 +243,10 @@
 | # | Test | Done | Result | Notes |
 |---|------|:----:|--------|-------|
 | 14.1 | Force-kill the app during processing (after transcription starts but before completion). Relaunch and verify partial data was saved (transcript chunks so far). | [ ] | Pass / Fail | |
-| 14.2 | Complete a full recording flow. Force-kill and relaunch. Verify the meeting, transcript, and action items are all intact. | [ ] | Pass / Fail | |
-| 14.3 | Open a completed meeting. Verify Core Data relationships are intact: Meeting has TranscriptChunks and ActionItems. | [ ] | Pass / Fail | |
-| 14.4 | Verify TranscriptChunks are ordered by their `order` field (check that text flows correctly in MeetingDetailView). | [ ] | Pass / Fail | |
-| 14.5 | After syncing to Reminders/Calendar, verify `reminderIdentifier` and `calendarEventIdentifier` are stored (re-opening the meeting should show sync badges). | [ ] | Pass / Fail | |
+| 14.2 | Complete a full recording flow. Force-kill and relaunch. Verify the meeting, transcript, and action items are all intact. | [Pass] | Pass | Force-killed and relaunched — meeting, transcript, and action items all intact. Build 15. |
+| 14.3 | Open a completed meeting. Verify Core Data relationships are intact: Meeting has TranscriptChunks and ActionItems. | [Pass] | Pass | Meeting shows transcript chunks and action items correctly. Build 15. |
+| 14.4 | Verify TranscriptChunks are ordered by their `order` field (check that text flows correctly in MeetingDetailView). | [Pass] | Pass | Chunks display in correct order — text flows naturally. Build 15. |
+| 14.5 | After syncing to Reminders/Calendar, verify `reminderIdentifier` and `calendarEventIdentifier` are stored (re-opening the meeting should show sync badges). | [Pass] | Pass | Sync badges still visible on previously synced meeting. Build 15. |
 
 ---
 
